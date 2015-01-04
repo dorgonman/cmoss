@@ -41,19 +41,27 @@ then
   curl $PROXY -O "http://surfnet.dl.sourceforge.net/project/boost/boost/${BOOST_VERSION}/${BOOST_SOURCE_NAME}.tar.gz"
 fi
 
+
+#rm -rf "${BOOST_SOURCE_NAME}"
 # Extract source
-rm -rf "${BOOST_SOURCE_NAME}"
-tar xvf "${BOOST_SOURCE_NAME}.tar.gz"
+if [ ! -d "${BOOST_SOURCE_NAME}" ]
+then
+  tar xvf "${BOOST_SOURCE_NAME}.tar.gz"
+fi
+
 
 pushd "${BOOST_SOURCE_NAME}"
-tar xvf "${TOPDIR}/build-droid/droid-boost-patch.tar.gz"
+
+
+#tar xvf "${TOPDIR}/build-droid/droid-boost-patch.tar.gz"
+
 
 # Build
 
 # ---------
 # Bootstrap
 # ---------
-
+rm -f project-config.jam
 # Make the initial bootstrap
 BOOST_LIBS_COMMA=$(echo $BOOST_LIBS | sed -e "s/ /,/g")
 echo "Bootstrapping (with libs $BOOST_LIBS_COMMA)"
@@ -68,33 +76,34 @@ fi
 # -------------------------------------------------------------
 
 # Apply patches to boost
-PATCHES_DIR=droid-boost-patch
-if [ ! -d "$PATCHES_DIR" ] ; then
-	echo "ERROR: Could not locate droid build patch files."
-	exit 1
-fi
+#PATCHES_DIR=droid-boost-patch
+#if [ ! -d "$PATCHES_DIR" ] ; then
+	#echo "ERROR: Could not locate droid build patch files."
+	#exit 1
+#fi
 
-PATCHES=`(cd $PATCHES_DIR && find . -name "*.patch" | sort) 2> /dev/null`
-if [ -z "$PATCHES" ] ; then
-	echo "No patches files in $PATCHES_DIR"
-else
-	PATCHES=`echo $PATCHES | sed -e s%^\./%%g`
-	SRC_DIR=${TMPDIR}/${BOOST_SOURCE_NAME}
-	for PATCH in $PATCHES; do
-		PATCHDIR=`dirname $PATCH`
-		PATCHNAME=`basename $PATCH`
-		echo "Applying $PATCHNAME into $SRC_DIR/$PATCHDIR"
-		patch -p1 < $PATCHES_DIR/$PATCH
-		if [ $? != 0 ] ; then
-			dump "ERROR: Patch failure !! Please check your patches directory! Try to perform a clean build using --clean"
-			exit 1
-		fi
-	done
-fi
+#PATCHES=`(cd $PATCHES_DIR && find . -name "*.patch" | sort) 2> /dev/null`
+#if [ -z "$PATCHES" ] ; then
+#	echo "No patches files in $PATCHES_DIR"
+#else
+#	PATCHES=`echo $PATCHES | sed -e s%^\./%%g`
+#	SRC_DIR=${TMPDIR}/${BOOST_SOURCE_NAME}
+#	for PATCH in $PATCHES; do
+#		PATCHDIR=`dirname $PATCH`
+#		PATCHNAME=`basename $PATCH`
+#		echo "Applying $PATCHNAME into $SRC_DIR/$PATCHDIR"
+#		patch -p1 < $PATCHES_DIR/$PATCH
+#		if [ $? != 0 ] ; then
+#			dump "ERROR: Patch failure !! Please check your patches directory! Try to perform a clean build using --clean"
+#			exit 1
+#		fi
+#	done
+#fi
 
-cat >> tools/build/v2/user-config.jam <<EOF
 
-using android : i686 : ${DROIDTOOLS}-g++ :
+cat > ~/user-config.jam <<EOF
+
+using gcc : i686 : ${DROIDTOOLS}-g++ :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
@@ -133,7 +142,7 @@ using android : i686 : ${DROIDTOOLS}-g++ :
 <cxxflags>-D_GLIBCXX__PTHREADS
 ;
 
-using android : arm : ${DROIDTOOLS}-g++ :
+using gcc : arm : ${DROIDTOOLS}-g++ :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
@@ -145,17 +154,14 @@ using android : arm : ${DROIDTOOLS}-g++ :
 <compileflags>-fpic
 <compileflags>-ffunction-sections
 <compileflags>-funwind-tables
-<compileflags>-march=armv5te
+<compileflags>-march=armv7
 <compileflags>-mtune=xscale
 <compileflags>-msoft-float
 <compileflags>-mthumb
 <compileflags>-fomit-frame-pointer
 <compileflags>-fno-strict-aliasing
 <compileflags>-finline-limit=64
-<compileflags>-D__ARM_ARCH_5__
-<compileflags>-D__ARM_ARCH_5T__
-<compileflags>-D__ARM_ARCH_5E__
-<compileflags>-D__ARM_ARCH_5TE__
+<compileflags>-D__ARM_ARCH_7__
 <compileflags>-DANDROID
 <compileflags>-D__ANDROID__
 <compileflags>-DNDEBUG
@@ -171,7 +177,7 @@ using android : arm : ${DROIDTOOLS}-g++ :
 <linkflags>-L${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/armeabi-v7a
 <linkflags>-L${ROOTDIR}/lib
 # Flags above are for android
-<architecture>arm
+<architecture>armv7
 <compileflags>-fvisibility=hidden
 <compileflags>-fvisibility-inlines-hidden
 <compileflags>-fdata-sections
@@ -180,24 +186,24 @@ using android : arm : ${DROIDTOOLS}-g++ :
 <cxxflags>-D_REENTRANT
 <cxxflags>-D_GLIBCXX__PTHREADS
 ;
-EOF
 
-cat >> project-config.jam <<EOF
 option.set prefix : ${ROOTDIR}/ ;
 option.set exec-prefix : ${ROOTDIR}/bin ;
 option.set libdir : ${ROOTDIR}/lib ;
 option.set includedir : ${ROOTDIR}/include ;
 EOF
 
+
+
 if [ "${PLATFORM}" == "arm-linux-androideabi" ]
 then
-	./b2 link=static threading=multi --layout=unversioned target-os=linux toolset=android-arm install
+	./b2 link=static threading=multi --layout=versioned target-os=android toolset=gcc-arm install --prefix=${ROOTDIR}
 else
-	./b2 link=static threading=multi --layout=unversioned target-os=linux toolset=android-i686 install
+	./b2 link=static threading=multi --layout=versioned target-os=android toolset=gcc-i686 install --prefix=${ROOTDIR}
 fi
 
 # Combine boost libraries into one static archive
-
+echo ==ROOTDIR======${ROOTDIR} =========$(find "${ROOTDIR}/lib" -name "libboost_*.a" -print)
 mkdir -p "${BOOST_SOURCE_NAME}/tmp/obj"
 for a in $(find "${ROOTDIR}/lib" -name "libboost_*.a" -print); do
 
@@ -214,4 +220,4 @@ ${DROIDTOOLS}-ar rv "${ROOTDIR}/lib/libboost.a" $OBJFILES
 
 # Clean up
 popd
-rm -rf "${BOOST_SOURCE_NAME}"
+#rm -rf "${BOOST_SOURCE_NAME}"

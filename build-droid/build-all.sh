@@ -3,8 +3,11 @@ set -e
 
 # Retrieve NDK path to use
 NDK=$1
+echo NDK path="$NDK"
+
 if [ "${NDK}" == "" ] || [ ! -e ${NDK}/build/tools/make-standalone-toolchain.sh ]
 then
+  cat ${NDK}/build/tools/make-standalone-toolchain.sh
   echo "Please specify a valid NDK path."
   exit 1
 fi
@@ -50,8 +53,8 @@ export CURL_VERSION="7.28.1"
 export LIBGSASL_VERSION="1.8.0"
 
 # Project version to use to build boost C++ libraries
-export BOOST_VERSION="1.52.0"
-export BOOST_LIBS="chrono context date_time exception filesystem graph graph_parallel iostreams mpi program_options random regex serialization signals system test thread timer wave"
+export BOOST_VERSION="1.57.0"
+export BOOST_LIBS="chrono date_time exception filesystem graph graph_parallel iostreams mpi program_options random regex serialization signals system test thread timer wave"
 
 # Project version to use to build tinyxml
 export TINYXML_VERSION="2.6.2"
@@ -67,7 +70,7 @@ export YAJL_VERSION="2.0.3"
 export SQLCIPHER_VERSION="2.1.1"
 
 # Project versions to use for SOCI (Sqlite3 C++ database library)
-export SOCI_VERSION="3.1.0"
+export SOCI_VERSION="3.2.2"
 
 # Project version to use to build pion (changing this may break the build)
 export PION_VERSION="master"
@@ -88,24 +91,26 @@ mkdir -p $TMPDIR
 
 pushd $TMPDIR
 
-export ANDROID_API_LEVEL="14"
+export ANDROID_API_LEVEL="21"
 export ARM_TARGET="armv7"
 
 if [ -z $TOOLCHAIN_VERSION ]
 then
-	export TOOLCHAIN_VERSION="4.7"
+	export TOOLCHAIN_VERSION="4.6"
 fi
 
 # Platforms to build for (changing this may break the build)
+#PLATFORMS="arm-linux-androideabi x86"
 PLATFORMS="arm-linux-androideabi"
 
 # Create tool chains for each supported platform
 for PLATFORM in ${PLATFORMS}
 do
-	echo "Creating toolchain for platform ${PLATFORM}..."
+	echo "Checking toolchain for platform ${PLATFORM}..."
 
 	if [ ! -d "${TMPDIR}/droidtoolchains/${PLATFORM}" ]
 	then
+		echo "Creating toolchain for platform ${PLATFORM}..."
 		$NDK/build/tools/make-standalone-toolchain.sh \
 			--verbose \
 			--platform=android-${ANDROID_API_LEVEL} \
@@ -135,61 +140,61 @@ do
 	export SYSROOT=${TMPDIR}/droidtoolchains/${PLATFORM}/sysroot
 
 	# Build minizip
-	${TOPDIR}/build-droid/build-minizip.sh > "${LOGPATH}-minizip.log"
+	#${TOPDIR}/build-droid/build-minizip.sh > "${LOGPATH}-minizip.log"
 
 	# Build icu
-	${TOPDIR}/build-droid/build-icu.sh > "${LOGPATH}-icu.log"
+	#${TOPDIR}/build-droid/build-icu.sh > "${LOGPATH}-icu.log"
 
 	# Build c-ares
-	${TOPDIR}/build-droid/build-cares.sh > "${LOGPATH}-cares.log"
+	#${TOPDIR}/build-droid/build-cares.sh > "${LOGPATH}-cares.log"
 
 	# Build bzip2
-	${TOPDIR}/build-droid/build-bzip2.sh > "${LOGPATH}-bzip2.log"
+	#${TOPDIR}/build-droid/build-bzip2.sh > "${LOGPATH}-bzip2.log"
 
 	# Build libidn (before curl and gsasl)
-	${TOPDIR}/build-droid/build-libidn.sh > "${LOGPATH}-libidn.log"
+	#${TOPDIR}/build-droid/build-libidn.sh > "${LOGPATH}-libidn.log"
 
 	# Build libgpg-error
-	${TOPDIR}/build-droid/build-libgpg-error.sh > "${LOGPATH}-libgpg-error.log"
+	#${TOPDIR}/build-droid/build-libgpg-error.sh > "${LOGPATH}-libgpg-error.log"
 
 	# Build libgcrypt
-	${TOPDIR}/build-droid/build-libgcrypt.sh > "${LOGPATH}-libgcrypt.log"
+	#${TOPDIR}/build-droid/build-libgcrypt.sh > "${LOGPATH}-libgcrypt.log"
 
 	# Build GnuPG
-	${TOPDIR}/build-droid/build-GnuPG.sh > "${LOGPATH}-GnuPG.log"
+	#${TOPDIR}/build-droid/build-GnuPG.sh > "${LOGPATH}-GnuPG.log"
 
 	# Build OpenSSL
-	${TOPDIR}/build-droid/build-openssl.sh > "${LOGPATH}-OpenSSL.log"
+	#${TOPDIR}/build-droid/build-openssl.sh > "${LOGPATH}-OpenSSL.log"
 
 	# Build libssh2
-	${TOPDIR}/build-droid/build-libssh2.sh > "${LOGPATH}-libssh2.log"
+	#${TOPDIR}/build-droid/build-libssh2.sh > "${LOGPATH}-libssh2.log"
 
 	# Build cURL
-	${TOPDIR}/build-droid/build-cURL.sh > "${LOGPATH}-cURL.log"
+	#${TOPDIR}/build-droid/build-cURL.sh > "${LOGPATH}-cURL.log"
 
 	# Build libgsasl
-	${TOPDIR}/build-droid/build-libgsasl.sh > "${LOGPATH}-libgsasl.log"
+	#${TOPDIR}/build-droid/build-libgsasl.sh > "${LOGPATH}-libgsasl.log"
 
 	# Build BOOST
 	${TOPDIR}/build-droid/build-boost.sh > "${LOGPATH}-boost.log"
 
 	# Build tinyxml
-	${TOPDIR}/build-droid/build-tinyxml.sh > "${LOGPATH}-tinyxml.log"
+	#${TOPDIR}/build-droid/build-tinyxml.sh > "${LOGPATH}-tinyxml.log"
 
 	# Build expat
-	${TOPDIR}/build-droid/build-expat.sh > "${LOGPATH}-expat.log"
+	#${TOPDIR}/build-droid/build-expat.sh > "${LOGPATH}-expat.log"
 
 	# Build yajl
-	${TOPDIR}/build-droid/build-yajl.sh > "${LOGPATH}-yajl.log"
+	#${TOPDIR}/build-droid/build-yajl.sh > "${LOGPATH}-yajl.log"
 
 	# Build SQLCipher
-	${TOPDIR}/build-droid/build-sqlcipher.sh > "${LOGPATH}-sqlcipher.log"
+	#${TOPDIR}/build-droid/build-sqlcipher.sh > "${LOGPATH}-sqlcipher.log"
 
 	# Build SOCI
-	${TOPDIR}/build-droid/build-soci.sh > "${LOGPATH}-soci.log"
+	#${TOPDIR}/build-droid/build-soci.sh > "${LOGPATH}-soci.log"
 
 	# Build PION
-	${TOPDIR}/build-droid/build-pion.sh > "${LOGPATH}-pion.log"
+	#${TOPDIR}/build-droid/build-pion.sh > "${LOGPATH}-pion.log"
 
 	# Remove junk
 	rm -rf "${ROOTDIR}/bin"
