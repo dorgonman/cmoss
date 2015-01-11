@@ -38,7 +38,7 @@ BOOST_SOURCE_NAME=boost_${BOOST_VERSION//./_}
 # Download source
 if [ ! -e "${BOOST_SOURCE_NAME}.tar.gz" ]
 then
-  curl $PROXY -O "http://surfnet.dl.sourceforge.net/project/boost/boost/${BOOST_VERSION}/${BOOST_SOURCE_NAME}.tar.gz"
+  curl $PROXY -O -L "http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION}/${BOOST_SOURCE_NAME}.tar.bz2"
 fi
 
 
