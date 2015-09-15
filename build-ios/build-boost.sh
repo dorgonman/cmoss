@@ -132,6 +132,8 @@ unpackBoost()
 
     tar zxf $BOOST_TARBALL
     [ -d $BOOST_SOURCE_NAME ] && echo "    ...unpacked as $BOOST_SOURCE_NAME"
+
+    cp -rf  ${TOPDIR}/patches/boost/* ${BOOST_SOURCE_NAME}/
     cd $BOOST_SOURCE_NAME
 
     doneSection
