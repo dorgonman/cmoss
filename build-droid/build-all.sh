@@ -54,9 +54,10 @@ export LIBGSASL_VERSION="1.8.0"
 
 # Project version to use to build boost C++ libraries
 export BOOST_VERSION="1.59.0"
+#python
 export BOOST_LIBS="atomic chrono container context coroutine \
 				   coroutine2 date_time exception filesystem graph graph_parallel iostreams \
-				   locale log math mpi program_options python \
+				   locale log math mpi program_options  \
 				   random regex serialization signals system test thread timer wave"
 # Project version to use to build tinyxml
 export TINYXML_VERSION="2.6.2"

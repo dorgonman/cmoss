@@ -50,6 +50,8 @@ then
 fi
 
 
+cp -rf  patches/* ${BOOST_SOURCE_NAME}/
+
 pushd "${BOOST_SOURCE_NAME}"
 
 
