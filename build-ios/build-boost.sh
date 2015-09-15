@@ -191,7 +191,9 @@ buildBoostForiPhoneOS()
     ./b2 --prefix=$ROOTDIR -sBOOST_BUILD_USER_CONFIG=$JAM_FILE \
     --toolset=darwin-${SDK_VER}~iphone cxxflags="-std=c++11 -stdlib=libc++" \
      variant=release linkflags="-stdlib=libc++" architecture=${ARCHITECTURE} target-os=iphone \
+     address-model=${ADDRESS_MODEL} \
      macosx-version=${BOOST_PLAT}-${SDK_VER} define=_LITTLE_ENDIAN link=static install
+
     doneSection
 }
 
@@ -203,13 +205,18 @@ scrunchAllLibsTogetherInOneLib()
     mkdir -p $OBJDIR
     for a in $ROOTDIR/lib/libboost_*.a; do
         echo thining $a...
-        lipo -thin $ARCH $a -output $a
+        FAT_FILE=$(lipo -info $a | grep "Non-fat file")
+        if [ "${FAT_FILE}" == "" ]
+        then
+            echo "fat file and lipo thin $ARCH $a"
+            lipo -thin $ARCH $a -output $a
+        fi
         echo Decomposing $a...
-        (cd $OBJDIR; ${DEV_DIR}/ar -x $a );
+        (cd $OBJDIR; ${AR} -x $a );
     done;
 
     echo creating $ROOTDIR/lib/libboost.a
-    (cd $OBJDIR; ${DEV_DIR}/ar crus $ROOTDIR/lib/libboost.a *.o; )
+    (cd $OBJDIR; ${AR} crus $ROOTDIR/lib/libboost.a *.o; )
 }
 
 #===============================================================================

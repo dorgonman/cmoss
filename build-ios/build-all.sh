@@ -51,8 +51,8 @@ export LIBGSASL_VERSION="1.8.0"
 
 # Project version to use to build boost C++ libraries
 export BOOST_VERSION="1.59.0"
-#context lib not supported
-export BOOST_LIBS="atomic chrono container coroutine \
+#context, thread lib not supported
+export BOOST_LIBS="atomic chrono container context coroutine \
 				   coroutine2 date_time exception filesystem graph graph_parallel iostreams \
 				   locale log math mpi program_options python \
 				   random regex serialization signals system test thread timer wave"
@@ -118,23 +118,26 @@ do
 	LOGPATH="${LOGDIR}/${TARGET}"
 	ROOTDIR="${TMPDIR}/build/ios/${TARGET}"
 	
-
+	ADDRESS_MODEL=32
 	PLATFORM="iPhoneOS"
 	if [ "${TARGET}" == "iPhoneOS_armv7" ]
 	then
 		PLATFORM="iPhoneOS"
 		ARCH="armv7"
 		ARCHITECTURE="arm"
+		ADDRESS_MODEL=32
 	elif [ "${TARGET}" == "iPhoneOS_arm64" ]
 	then
 		PLATFORM="iPhoneOS"
 		ARCH="arm64"
 		ARCHITECTURE="arm"
+		ADDRESS_MODEL=64
 	elif [ "${TARGET}" == "iPhoneSimulator" ]
 	then
 		PLATFORM="iPhoneSimulator"
 		ARCH="i386"
 		ARCHITECTURE="x86"
+		ADDRESS_MODEL=32
 	else
 		PLATFORM="MacOSX"
 		ARCH="i386"
@@ -157,7 +160,7 @@ do
 	export PLATFORM="${PLATFORM}"
 	export ARCH="${ARCH}"
 	export ARCHITECTURE="${ARCHITECTURE}"
-
+	export ADDRESS_MODEL="${ADDRESS_MODEL}"
 
 	export BUILD_DEVROOT="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
 	export BUILD_SDKROOT="${BUILD_DEVROOT}/SDKs/${PLATFORM}${SDK_VER}.sdk"
@@ -168,6 +171,7 @@ do
 	echo exported PLATFORM: 	${PLATFORM}
 	echo exported ARCH: 		${ARCH}
 	echo exported ARCHITECTURE: ${ARCHITECTURE}
+	echo exported ADDRESS_MODEL: ${ADDRESS_MODEL}
 	echo exported BUILD_DEVROOT:${BUILD_DEVROOT}
 	echo exported BUILD_SDKROOT:${BUILD_SDKROOT}
 

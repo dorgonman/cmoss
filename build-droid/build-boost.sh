@@ -103,7 +103,7 @@ fi
 
 cat > ~/user-config.jam <<EOF
 
-using gcc : i686 : ${DROIDTOOLS}-g++ :
+using gcc : i686 : ${CXX} :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
@@ -142,7 +142,7 @@ using gcc : i686 : ${DROIDTOOLS}-g++ :
 <cxxflags>-D_GLIBCXX__PTHREADS
 ;
 
-using gcc : arm : ${DROIDTOOLS}-g++ :
+using gcc : arm : ${CXX} :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
@@ -195,11 +195,11 @@ EOF
 
 
 
-if [ "${PLATFORM}" == "arm-linux-androideabi" ]
+if [ "${PLATFORM}" == "android-arm" ]
 then
-	./b2 link=static threading=multi --layout=versioned target-os=android toolset=gcc-arm install --prefix=${ROOTDIR}
+	./b2 address-model=${ADDRESS_MODEL} link=static threading=multi --layout=versioned target-os=android toolset=gcc-arm install --prefix=${ROOTDIR}
 else
-	./b2 link=static threading=multi --layout=versioned target-os=android toolset=gcc-i686 install --prefix=${ROOTDIR}
+	./b2 address-model=${ADDRESS_MODEL} link=static threading=multi --layout=versioned target-os=android toolset=gcc-i686 install --prefix=${ROOTDIR}
 fi
 
 # Combine boost libraries into one static archive
@@ -208,12 +208,12 @@ mkdir -p "${BOOST_SOURCE_NAME}/tmp/obj"
 for a in $(find "${ROOTDIR}/lib" -name "libboost_*.a" -print); do
 
 	echo Decomposing $a...
-	(cd ${BOOST_SOURCE_NAME}/tmp/obj; ${DROIDTOOLS}-ar -x $a );
+	(cd ${BOOST_SOURCE_NAME}/tmp/obj; ${AR} -x $a );
 
 done
 
 OBJFILES=`find "${BOOST_SOURCE_NAME}/tmp/obj" -name "*.o" -print`
-${DROIDTOOLS}-ar rv "${ROOTDIR}/lib/libboost.a" $OBJFILES
+${AR} rv "${ROOTDIR}/lib/libboost.a" $OBJFILES
 #find "${ROOTDIR}/lib" -name "libboost_*.a" -exec rm -f {} \;
 
 #===============================================================================

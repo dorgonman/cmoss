@@ -34,30 +34,32 @@ fi
 
 # Extract source
 rm -rf "icu"
-tar xvf "icu4c-${ICU_VERSION//./_}-src.tgz"
+tar xf "icu4c-${ICU_VERSION//./_}-src.tgz"
 
 # Build
 
 HOSTBUILD=${TMPDIR}/icu-hostbuild
-
 if [ ! -d ${HOSTBUILD} ]
 then
 	mkdir -p ${HOSTBUILD}
 	pushd ${HOSTBUILD}
-	${TMPDIR}/icu/source/configure --prefix="${HOSTBUILD}"
-	make
+	#./configure
+	#make
 	popd
 fi
 
 ICU_FLAGS="-I${TMPDIR}/icu/source/common/ -I${TMPDIR}/icu/source/tools/tzcode/"
 
-export LDFLAGS="-Os -arch ${ARCH} -Wl,-dead_strip -miphoneos-version-min=2.2 -L${ROOTDIR}/lib"
+export LDFLAGS="-Os -arch ${ARCH} -Wl,-dead_strip -miphoneos-version-min=4.2 -L${ROOTDIR}/lib"
 export CFLAGS="-Os -arch ${ARCH} -pipe -no-cpp-precomp -isysroot ${BUILD_SDKROOT} -miphoneos-version-min=2.2 ${ICU_FLAGS} -I${ROOTDIR}/include"
 export CPPFLAGS="${CFLAGS}"
 export CXXFLAGS="${CFLAGS}"
 
 pushd "icu/source"
-./configure --host=${ARCH}-apple-darwin --prefix=${ROOTDIR} --with-cross-build="${HOSTBUILD}" --enable-static --disable-shared --enable-extras=no --enable-strict=no --enable-tests=no --enable-samples=no --enable-dyload=no --enable-tools=no --with-data-packaging=archive
+./configure --host=${ARCH}-apple-darwin --prefix=${ROOTDIR} \
+			--enable-static --disable-shared --enable-extras=no --enable-strict=no --enable-tests=no --enable-samples=no \
+			--enable-dyload=no --with-data-packaging=archive #\
+#			--with-cross-build="${HOSTBUILD}"
 
 make VERBOSE=1
 make install

@@ -53,12 +53,11 @@ export CURL_VERSION="7.28.1"
 export LIBGSASL_VERSION="1.8.0"
 
 # Project version to use to build boost C++ libraries
-#context thread
 export BOOST_VERSION="1.59.0"
-export BOOST_LIBS="atomic chrono container coroutine \
+export BOOST_LIBS="atomic chrono container context coroutine \
 				   coroutine2 date_time exception filesystem graph graph_parallel iostreams \
 				   locale log math mpi program_options python \
-				   random regex serialization signals system test timer wave"
+				   random regex serialization signals system test thread timer wave"
 # Project version to use to build tinyxml
 export TINYXML_VERSION="2.6.2"
 export TINYXML_FILE="2_6_2"
@@ -94,7 +93,7 @@ mkdir -p $TMPDIR
 
 pushd $TMPDIR
 
-export ANDROID_API_LEVEL="19"
+export ANDROID_API_LEVEL="21"
 export ARM_TARGET="armv7"
 
 if [ -z $TOOLCHAIN_VERSION ]
@@ -104,43 +103,74 @@ fi
 
 # Platforms to build for (changing this may break the build)
 #PLATFORMS="arm-linux-androideabi x86"
-PLATFORMS="arm-linux-androideabi"
+#PLATFORMS="arm-linux-androideabi"
+TARGETS="arm-linux-androideabi"
 
 # Create tool chains for each supported platform
-for PLATFORM in ${PLATFORMS}
+for TARGET in ${TARGETS}
 do
-	echo "Checking toolchain for platform ${PLATFORM}..."
+	echo "Checking toolchain for platform ${TARGET}..."
 
-	if [ ! -d "${TMPDIR}/droidtoolchains/${PLATFORM}" ]
+	if [ ! -d "${TMPDIR}/droidtoolchains/${TARGET}" ]
 	then
-		echo "Creating toolchain for platform ${PLATFORM}..."
+		echo "Creating toolchain for platform ${TARGET}..."
 		$NDK/build/tools/make-standalone-toolchain.sh \
 			--verbose \
 			--platform=android-${ANDROID_API_LEVEL} \
 			--toolchain=${PLATFORM}-${TOOLCHAIN_VERSION} \
-			--install-dir=${TMPDIR}/droidtoolchains/${PLATFORM}
+			--install-dir=${TMPDIR}/droidtoolchains/${TARGET}
 	fi
 done
 
 # Build projects
-for PLATFORM in ${PLATFORMS}
+for TARGET in ${TARGETS}
 do
-	LOGPATH="${LOGDIR}/${PLATFORM}"
-	ROOTDIR="${TMPDIR}/build/droid/${PLATFORM}"
+	LOGPATH="${LOGDIR}/${TARGET}"
+	ROOTDIR="${TMPDIR}/build/droid/${TARGET}"
 
 	mkdir -p "${ROOTDIR}"
 
-	if [ "${PLATFORM}" == "arm-linux-androideabi" ]
+
+	if [ "${TARGET}" == "arm-linux-androideabi" ]
 	then
-		export ARCH=${ARM_TARGET}
+		PLATFORM="android-arm"
+		ARCH=${ARM_TARGET}
+		ARCHITECTURE="arm"
+		ADDRESS_MODEL=32
 	else
-		export ARCH="x86"
+		PLATFORM="android-i386"
+		ARCH="i386"
+		ARCHITECTURE="x86"
 	fi
 
 	export ROOTDIR=${ROOTDIR}
 	export PLATFORM=${PLATFORM}
-	export DROIDTOOLS=${TMPDIR}/droidtoolchains/${PLATFORM}/bin/${PLATFORM}
-	export SYSROOT=${TMPDIR}/droidtoolchains/${PLATFORM}/sysroot
+	export DROIDTOOLS=${TMPDIR}/droidtoolchains/${TARGET}/bin/${TARGET}
+	export SYSROOT=${TMPDIR}/droidtoolchains/${TARGET}/sysroot
+	export ARCH="${ARCH}"
+	export ARCHITECTURE="${ARCHITECTURE}"
+	export ADDRESS_MODEL="${ADDRESS_MODEL}"
+
+
+	
+
+	export CC="${DROIDTOOLS}-gcc"
+	export LD="${DROIDTOOLS}-ld"
+	export CXX="${DROIDTOOLS}-g++"
+	export AR="${DROIDTOOLS}-ar"
+	export AS="${DROIDTOOLS}-as"
+	export NM="${DROIDTOOLS}-nm"
+	export STRIP="${DROIDTOOLS}-strip"
+	export RANLIB="${DROIDTOOLS}-ranlib"
+
+	echo CC:             ${CC}
+	echo LD:             ${LD}
+	echo CXX:            ${CXX}
+	echo AR:			 ${AR}
+	echo AS:			 ${AS}
+	echo NM:			 ${NM}
+	echo STRIP:			 ${STRIP}
+	echo RANLIB:		 ${RANLIB}
 
 	# Build minizip
 	#${TOPDIR}/build-droid/build-minizip.sh > "${LOGPATH}-minizip.log"
