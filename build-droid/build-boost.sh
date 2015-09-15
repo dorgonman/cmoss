@@ -50,7 +50,7 @@ then
 fi
 
 
-cp -rf  ${TOPDIR}/boost/patches/* ${BOOST_SOURCE_NAME}/
+cp -rf  ${TOPDIR}/patches/boost/* ${BOOST_SOURCE_NAME}/
 
 pushd "${BOOST_SOURCE_NAME}"
 
