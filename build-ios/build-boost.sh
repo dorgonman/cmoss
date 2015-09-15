@@ -26,12 +26,13 @@ set -e
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-BOOST_SOURCE_NAME=boost_${BOOST_VERSION//./_}
 
+BOOST_SOURCE_NAME=boost_${BOOST_VERSION//./_}
+BOOST_DOWNLOAD_FILE_SURFIX=".tar.bz2"
 # Download source
-if [ ! -e "${BOOST_SOURCE_NAME}.tar.gz" ]
+if [ ! -e "${BOOST_SOURCE_NAME}${BOOST_DOWNLOAD_FILE_SURFIX}" ]
 then
-  curl $PROXY -O "http://surfnet.dl.sourceforge.net/project/boost/boost/${BOOST_VERSION}/${BOOST_SOURCE_NAME}.tar.gz"
+   curl $PROXY -O -L "http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION}/${BOOST_SOURCE_NAME}${BOOST_DOWNLOAD_FILE_SURFIX}"
 fi
 
 # Build
@@ -51,13 +52,13 @@ fi
 # To configure the script, define:
 #    BOOST_LIBS:        which libraries to build
 #    BOOST_VERSION:     version number of the boost library (e.g. 1_41_0)
-#    IPHONE_SDKVERSION: iPhone SDK version (e.g. 3.0)
+#    SDK_VER: iPhone SDK version (e.g. 3.0)
 #
 # Then go get the source tar.bz of the boost you want to build, shove it in the
 # same directory as this script, and run "./boost.sh". Grab a cuppa. And voila.
 #===============================================================================
 
-: ${IPHONE_SDKVERSION:=${SDK}}
+
 : ${EXTRA_CPPFLAGS:="-Os -DBOOST_AC_USE_PTHREADS -DBOOST_SP_USE_PTHREADS"}
 
 # The EXTRA_CPPFLAGS definition works around a thread race issue in
@@ -70,7 +71,7 @@ fi
 
 : ${TARBALLDIR:=`pwd`}
 
-BOOST_TARBALL=$TARBALLDIR/${BOOST_SOURCE_NAME}.tar.gz
+BOOST_TARBALL=$TARBALLDIR/${BOOST_SOURCE_NAME}${BOOST_DOWNLOAD_FILE_SURFIX}
 
 #===============================================================================
 
@@ -78,20 +79,20 @@ DEV_DIR=${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/usr/bin/
 
 #===============================================================================
 
+JAM_FILE=$ROOTDIR/user-config.jam
+
+
 echo "BOOST_VERSION:     $BOOST_VERSION"
 echo "BOOST_LIBS:        $BOOST_LIBS"
 echo "BOOST_TARBALL:     $BOOST_TARBALL"
-echo "IPHONE_SDKVERSION: $IPHONE_SDKVERSION"
-echo
-
+echo "SDK_VER: $SDK_VER"
+echo "JAM_FILE: $JAM_FILE"
 # boost needs its own versions of some values
 if [ "${PLATFORM}" == "iPhoneSimulator" ]
 then
     BOOST_PLAT="iphonesim"
-    BOOST_ARCH="x86"
 else
     BOOST_PLAT="iphone"
-    BOOST_ARCH="arm"
 fi
 
 #===============================================================================
@@ -129,7 +130,7 @@ unpackBoost()
 
     rm -rfv "$BOOST_SOURCE_NAME"
 
-    tar zxvf $BOOST_TARBALL
+    tar zxf $BOOST_TARBALL
     [ -d $BOOST_SOURCE_NAME ] && echo "    ...unpacked as $BOOST_SOURCE_NAME"
     cd $BOOST_SOURCE_NAME
 
@@ -144,12 +145,13 @@ writeBjamUserConfig()
     # ONLY SEEMS TO WORK IN HOME DIR GRR
     echo Writing usr-config
 
-    cat >> tools/build/v2/user-config.jam <<EOF
-using darwin : ${SDK}~${BOOST_PLAT}
-   : ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/usr/bin/gcc -arch $ARCH -mthumb -fvisibility=hidden -fvisibility-inlines-hidden $EXTRA_CPPFLAGS
-   : 
-   : <architecture>$BOOST_ARCH <target-os>iphone
-   ;
+    cat >> ${JAM_FILE} <<EOF
+using darwin : ${SDK_VER}~iphone
+: ${CXX} -arch ${ARCH} $EXTRA_CPPFLAGS "-isysroot ${BUILD_SDKROOT}" -I${BUILD_SDKROOT}/usr/include/
+: <striper> <root>${BUILD_DEVROOT}
+: <architecture>${ARCHITECTURE} <target-os>iphone
+;
+
 EOF
     doneSection
 }
@@ -178,8 +180,18 @@ bootstrapBoost()
 #===============================================================================
 
 buildBoostForiPhoneOS()
-{
-    ./bjam --prefix="$ROOTDIR" toolset=darwin architecture=$BOOST_ARCH target-os=iphone macosx-version=${BOOST_PLAT}-${IPHONE_SDKVERSION} define=_LITTLE_ENDIAN link=static install
+{   
+    echo rootDir: $ROOTDIR
+    
+    #cat ~./user-config.jam 
+    #./bjam --prefix="$ROOTDIR" toolset=darwin-${SDK_VER}~${PLATFORM} \
+    # architecture=${ARCHITECTURE} target-os=iphone macosx-version=iPhoneOS-${SDK_VER} define=_LITTLE_ENDIAN link=static install
+    #./bjam --prefix="$ROOTDIR" toolset=darwin architecture=$BOOST_ARCH target-os=iphone macosx-version=${BOOST_PLAT}-${SDK_VER} define=_LITTLE_ENDIAN link=static install
+
+    ./b2 --prefix=$ROOTDIR -sBOOST_BUILD_USER_CONFIG=$JAM_FILE \
+    --toolset=darwin-${SDK_VER}~iphone cxxflags="-std=c++11 -stdlib=libc++" \
+     variant=release linkflags="-stdlib=libc++" architecture=${ARCHITECTURE} target-os=iphone \
+     macosx-version=${BOOST_PLAT}-${SDK_VER} define=_LITTLE_ENDIAN link=static install
     doneSection
 }
 
@@ -190,14 +202,8 @@ scrunchAllLibsTogetherInOneLib()
     OBJDIR=$BOOST_SOURCE_NAME/tmp/obj
     mkdir -p $OBJDIR
     for a in $ROOTDIR/lib/libboost_*.a; do
-    
-        # telling bjam to make armv7 always makes fat arm6/7 binaries (ug); we need to thin it to just the arch we want    
-        if [ "${ARCH}" == "armv7" ]
-        then
-            echo thining $a...
-            lipo -thin $ARCH $a -output $a
-        fi    
-
+        echo thining $a...
+        lipo -thin $ARCH $a -output $a
         echo Decomposing $a...
         (cd $OBJDIR; ${DEV_DIR}/ar -x $a );
     done;
@@ -214,6 +220,7 @@ scrunchAllLibsTogetherInOneLib()
 
 cleanEverythingReadyToStart
 unpackBoost
+#cd $BOOST_SOURCE_NAME
 inventMissingHeaders
 bootstrapBoost
 writeBjamUserConfig

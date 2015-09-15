@@ -1,16 +1,16 @@
 #!/bin/sh
 set -e
 
-# Retrieve iOS SDK to use
-SDK=$1
-if [ "${SDK}" == "" ]
+# Retrieve iOS SDK VERSION to use
+SDK_VER=$1
+if [ "${SDK_VER}" == "" ]
 then
   echo "Please specify an iOS SDK version number from the following possibilities:"
   xcodebuild -showsdks | grep "iphoneos"
   exit 1
 fi
 
-export SDK="${SDK}"
+export SDK_VER="${SDK_VER}"
 
 if [ -z $2 ]
 then
@@ -50,8 +50,12 @@ export CURL_VERSION="7.28.1"
 export LIBGSASL_VERSION="1.8.0"
 
 # Project version to use to build boost C++ libraries
-export BOOST_VERSION="1.52.0"
-export BOOST_LIBS="chrono context date_time exception filesystem graph graph_parallel iostreams mpi program_options python random regex serialization signals system test thread timer wave"
+export BOOST_VERSION="1.59.0"
+#context lib not supported
+export BOOST_LIBS="atomic chrono container coroutine \
+				   coroutine2 date_time exception filesystem graph graph_parallel iostreams \
+				   locale log math mpi program_options python \
+				   random regex serialization signals system test thread timer wave"
 
 # Project version to use to build tinyxml
 export TINYXML_VERSION="2.6.2"
@@ -89,53 +93,84 @@ mkdir -p ${TMPDIR}
 pushd ${TMPDIR}
 
 # Platforms to build for (changing this may break the build)
-PLATFORMS="iPhoneSimulator iPhoneOS-V6 iPhoneOS-V7"
-
+#iPhoneSimulator
+#PLATFORMS="iPhoneOS_arm iPhoneOS_arm64"
+TARGETS="iPhoneSimulator iPhoneOS_armv7 iPhoneOS_arm64"
+#PLATFORMS="iPhoneSimulator iPhoneOS"
 # Location of SDK
 DEVELOPER=`xcode-select --print-path`
 export DEVELOPER="${DEVELOPER}"
 
 # Build projects
-for PLATFORM in ${PLATFORMS}
+for TARGET in ${TARGETS}
 do
-	ROOTDIR="${TMPDIR}/build/ios/${PLATFORM}"
+	ROOTDIR="${TMPDIR}/build/ios/${TARGET}"
 	rm -rf "${ROOTDIR}"
 	mkdir -p "${ROOTDIR}"
 done
 
-for PLATFORM in ${PLATFORMS}
+
+for TARGET in ${TARGETS}
 do
-	p=${PLATFORM}
-	echo "Building libraries for ${p}..."
 
-	LOGPATH="${LOGDIR}/${PLATFORM}"
-	ROOTDIR="${TMPDIR}/build/ios/${PLATFORM}"
-	CSDK=${SDK}
+	echo "Building libraries for target platform: ${TARGET}..."
 
-	if [ "${PLATFORM}" == "iPhoneOS-V7" ]
+	LOGPATH="${LOGDIR}/${TARGET}"
+	ROOTDIR="${TMPDIR}/build/ios/${TARGET}"
+	
+
+	PLATFORM="iPhoneOS"
+	if [ "${TARGET}" == "iPhoneOS_armv7" ]
 	then
 		PLATFORM="iPhoneOS"
 		ARCH="armv7"
-	elif [ "${PLATFORM}" == "iPhoneOS-V6" ]
+		ARCHITECTURE="arm"
+	elif [ "${TARGET}" == "iPhoneOS_arm64" ]
 	then
 		PLATFORM="iPhoneOS"
-		ARCH="armv6"
-		HAS_SDK_SUPPORT=`echo "${SDK} < 6.0" | bc`
-
-		if [ $HAS_SDK_SUPPORT == 0 ]
-		then
-			CSDK=5.1
-		fi
-	else
+		ARCH="arm64"
+		ARCHITECTURE="arm"
+	elif [ "${TARGET}" == "iPhoneSimulator" ]
+	then
+		PLATFORM="iPhoneSimulator"
 		ARCH="i386"
+		ARCHITECTURE="x86"
+	else
+		PLATFORM="MacOSX"
+		ARCH="i386"
+		ARCHITECTURE="x86"
 	fi
 
+	SDK_NAME=iphoneos${SDK_VER}
+	if [[ "${TARGET}" == *iPhoneOS* ]]
+	then
+		SDK_NAME=iphoneos${SDK_VER}
+	elif [ "${TARGET}" == *iPhoneSimulator* ]
+	then
+		SDK_NAME=iphonesimulator${SDK_VER}
+	else
+		SDK_NAME=macosx${SDK_VER}
+	fi
+
+	export SDK_NAME="${SDK_NAME}"
 	export ROOTDIR="${ROOTDIR}"
 	export PLATFORM="${PLATFORM}"
 	export ARCH="${ARCH}"
+	export ARCHITECTURE="${ARCHITECTURE}"
+
 
 	export BUILD_DEVROOT="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-	export BUILD_SDKROOT="${BUILD_DEVROOT}/SDKs/${PLATFORM}${CSDK}.sdk"
+	export BUILD_SDKROOT="${BUILD_DEVROOT}/SDKs/${PLATFORM}${SDK_VER}.sdk"
+
+
+	echo exported SDK_NAME: 		${SDK_NAME}
+	echo exported ROOTDIR: 		${ROOTDIR}
+	echo exported PLATFORM: 	${PLATFORM}
+	echo exported ARCH: 		${ARCH}
+	echo exported ARCHITECTURE: ${ARCHITECTURE}
+	echo exported BUILD_DEVROOT:${BUILD_DEVROOT}
+	echo exported BUILD_SDKROOT:${BUILD_SDKROOT}
+
 	if [ ! -d ${BUILD_SDKROOT} ]
 	then
 		rm -fr ${ROOTDIR}
@@ -143,73 +178,82 @@ do
 		continue
 	fi
 
-	PLATFORMS_BUILT="${PLATFORMS_BUILT}${p} "
+	PLATFORMS_BUILT="${PLATFORMS_BUILT}${TARGET} "
 
-	export CC="${BUILD_DEVROOT}/usr/bin/gcc"
-	export LD="${BUILD_DEVROOT}/usr/bin/ld"
-	export CXX="${BUILD_DEVROOT}/usr/bin/g++"
-	export AR="${BUILD_DEVROOT}/usr/bin/ar"
-	export AS="${BUILD_DEVROOT}/usr/bin/as"
-	export NM="${BUILD_DEVROOT}/usr/bin/nm"
-	export STRIP="${BUILD_DEVROOT}/usr/bin/strip"
-	export RANLIB="${BUILD_DEVROOT}/usr/bin/ranlib"
+	export CC="$(xcrun --sdk ${SDK_NAME} -find clang)"
+	export LD="$(xcrun --sdk ${SDK_NAME} -find ld)"
+	export CXX="$(xcrun --sdk ${SDK_NAME} -find clang++)"
+	export AR="$(xcrun --sdk ${SDK_NAME} -find ar)"
+	export AS="$(xcrun --sdk ${SDK_NAME} -find as)"
+	export NM="$(xcrun --sdk ${SDK_NAME} -find nm)"
+	export STRIP="$(xcrun --sdk ${SDK_NAME} -find strip)"
+	export RANLIB="$(xcrun --sdk ${SDK_NAME} -find ranlib)"
 
+	echo CC:             ${CC}
+	echo LD:             ${LD}
+	echo CXX:            ${CXX}
+	echo AR:			 ${AR}
+	echo AS:			 ${AS}
+	echo NM:			 ${NM}
+	echo STRIP:			 ${STRIP}
+	echo RANLIB:		 ${RANLIB}
 	# Build minizip
-	${TOPDIR}/build-ios/build-minizip.sh > "${LOGPATH}-minizip.log"
+	#${TOPDIR}/build-ios/build-minizip.sh > "${LOGPATH}-minizip.log"
 
 	# Build icu
-	${TOPDIR}/build-ios/build-icu.sh > "${LOGPATH}-icu.log"
+	#${TOPDIR}/build-ios/build-icu.sh #> "${LOGPATH}-icu.log"
 
 	# Build c-ares
-	${TOPDIR}/build-ios/build-cares.sh > "${LOGPATH}-cares.log"
+	#${TOPDIR}/build-ios/build-cares.sh > "${LOGPATH}-cares.log"
 
 	# Build bzip2
-	${TOPDIR}/build-ios/build-bzip2.sh > "${LOGPATH}-bzip2.log"
+	#${TOPDIR}/build-ios/build-bzip2.sh > "${LOGPATH}-bzip2.log"
 
 	# Build libidn (before curl and gsasl)
-	${TOPDIR}/build-ios/build-libidn.sh > "${LOGPATH}-libidn.log"
+	#${TOPDIR}/build-ios/build-libidn.sh > "${LOGPATH}-libidn.log"
 
 	# Build libgpg-error
-	${TOPDIR}/build-ios/build-libgpg-error.sh > "${LOGPATH}-libgpg-error.log"
+	#${TOPDIR}/build-ios/build-libgpg-error.sh > "${LOGPATH}-libgpg-error.log"
 
 	# Build libgcrypt
-	${TOPDIR}/build-ios/build-libgcrypt.sh > "${LOGPATH}-libgcrypt.log"
+	#${TOPDIR}/build-ios/build-libgcrypt.sh > "${LOGPATH}-libgcrypt.log"
 
 	# Build GnuPG
-	${TOPDIR}/build-ios/build-GnuPG.sh > "${LOGPATH}-GnuPG.log"
+	#${TOPDIR}/build-ios/build-GnuPG.sh > "${LOGPATH}-GnuPG.log"
 
 	# Build OpenSSL
-	${TOPDIR}/build-ios/build-openssl.sh > "${LOGPATH}-OpenSSL.log"
+	#${TOPDIR}/build-ios/build-openssl.sh > "${LOGPATH}-OpenSSL.log"
 
 	# Build libssh2
-	${TOPDIR}/build-ios/build-libssh2.sh > "${LOGPATH}-libssh2.log"
+	#${TOPDIR}/build-ios/build-libssh2.sh > "${LOGPATH}-libssh2.log"
 
 	# Build cURL
-	${TOPDIR}/build-ios/build-cURL.sh > "${LOGPATH}-cURL.log"
+	#${TOPDIR}/build-ios/build-cURL.sh > "${LOGPATH}-cURL.log"
 
 	# Build libgsasl
-	${TOPDIR}/build-ios/build-libgsasl.sh > "${LOGPATH}-libgsasl.log"
+	#${TOPDIR}/build-ios/build-libgsasl.sh > "${LOGPATH}-libgsasl.log"
 
 	# Build BOOST
+	echo "start build boost ${BOOST_VERSION}, be patient..."
 	${TOPDIR}/build-ios/build-boost.sh > "${LOGPATH}-boost.log"
 
 	# Build tinyxml
-	${TOPDIR}/build-ios/build-tinyxml.sh > "${LOGPATH}-tinyxml.log"
+	#${TOPDIR}/build-ios/build-tinyxml.sh > "${LOGPATH}-tinyxml.log"
 
 	# Build expat
-	${TOPDIR}/build-ios/build-expat.sh > "${LOGPATH}-expat.log"
+	#${TOPDIR}/build-ios/build-expat.sh > "${LOGPATH}-expat.log"
 
 	# Build yajl
-	${TOPDIR}/build-ios/build-yajl.sh > "${LOGPATH}-yajl.log"
+	#${TOPDIR}/build-ios/build-yajl.sh > "${LOGPATH}-yajl.log"
 
 	# Build SQLCipher
-	${TOPDIR}/build-ios/build-sqlcipher.sh > "${LOGPATH}-sqlcipher.log"
+	#${TOPDIR}/build-ios/build-sqlcipher.sh > "${LOGPATH}-sqlcipher.log"
 
 	# Build SOCI
-	${TOPDIR}/build-ios/build-soci.sh > "${LOGPATH}-soci.log"
+	#${TOPDIR}/build-ios/build-soci.sh > "${LOGPATH}-soci.log"
 
 	# Build PION
-	${TOPDIR}/build-ios/build-pion.sh > "${LOGPATH}-pion.log"
+	#${TOPDIR}/build-ios/build-pion.sh > "${LOGPATH}-pion.log"
 
 	# Remove junk
 	rm -rf "${ROOTDIR}/bin"
@@ -225,9 +269,11 @@ do
 
 done
 
-PLATFORMS=`echo ${PLATFORMS_BUILT}`
-echo "Build completed for platforms: ${PLATFORMS}"
 
+echo "Build completed for TARGETS: ${TARGETS}"
+
+BINDIR=$(pwd)/bin/
+echo BINDIR: ${BINDIR}
 # Create Lipo Archives and Framework bundle
 
 BUILD_DEVROOT=${DEVELOPER}/Platforms/iPhoneOS.platform/Developer
@@ -245,40 +291,28 @@ mkdir -p $BINDIR/lib
 mkdir -p $BINDIR/include
 
 rm -f $TMPDIR/build/ios*/lib/${FRAMEWORK_NAME}.a
-for PLATFORM in ${PLATFORMS}
+for TARGET in ${TARGETS}
 do
-	rm -rf $TMPDIR/build/ios/${PLATFORM}/obj
-	mkdir -p $TMPDIR/build/ios/${PLATFORM}/obj
+	rm -rf $TMPDIR/build/ios/${TARGET}/obj
+	mkdir -p $TMPDIR/build/ios/${TARGET}/obj
 done
+#if [[ "${PLATFORMS}" == *iPhoneOS-V6* ]]
 
 find $TMPDIR/build/ios -name "*.a" -exec basename {} \; > $BINDIR/libs
 for a in $(cat $BINDIR/libs | sort | uniq); do
 
 	echo Decomposing $a...
-	for PLATFORM in ${PLATFORMS}
+	for TARGET in ${TARGETS}
 	do
-		if [ "${PLATFORM}" == "iPhoneSimulator" ]
-		then
-			AR="${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/usr/bin/ar"
-		else
-			AR="${DEVELOPER}/Platforms/iPhoneOS.platform/Developer/usr/bin/ar"
-		fi
-		(cd $TMPDIR/build/ios/${PLATFORM}/obj; $AR -x $TMPDIR/build/ios/${PLATFORM}/lib/$a );
+		(cd $TMPDIR/build/ios/${TARGET}/obj; $AR -x $TMPDIR/build/ios/${TARGET}/lib/$a );
 	done
 
 	echo Creating fat archive $BINDIR/lib/$a...
-	if [[ "${PLATFORMS}" == *iPhoneOS-V6* ]]
-	then
-		$BUILD_DEVROOT/usr/bin/lipo -output "$BINDIR/lib/$a" -create \
-			-arch armv6 "$TMPDIR/build/ios/iPhoneOS-V6/lib/$a" \
-			-arch armv7 "$TMPDIR/build/ios/iPhoneOS-V7/lib/$a" \
-			-arch i386 "$TMPDIR/build/ios/iPhoneSimulator/lib/$a"
-	else
-		$BUILD_DEVROOT/usr/bin/lipo -output "$BINDIR/lib/$a" -create \
-			-arch armv7 "$TMPDIR/build/ios/iPhoneOS-V7/lib/$a" \
-			-arch i386 "$TMPDIR/build/ios/iPhoneSimulator/lib/$a"
-	fi
 
+	$BUILD_DEVROOT/usr/bin/lipo -output "$BINDIR/lib/$a" -create \
+		-arch armv7 "$TMPDIR/build/ios/iPhoneOS_armv7/lib/$a" \
+		-arch arm64 "$TMPDIR/build/ios/iPhoneOS_arm64/lib/$a" \
+		-arch i386 "$TMPDIR/build/ios/iPhoneSimulator/lib/$a"
 done
 rm -f $BINDIR/libs
 
@@ -296,7 +330,12 @@ do
 	(cd $TMPDIR/build/ios/${PLATFORM}/obj; $AR crus $TMPDIR/build/ios/${PLATFORM}/lib/${FRAMEWORK_NAME}.a *.o; )
 done
 
-cp -r "$TMPDIR/build/ios/iPhoneSimulator/include" "$BINDIR"
+
+if [ -d $TMPDIR/build/ios/iPhoneSimulator/include ]
+then
+	cp -r "$TMPDIR/build/ios/iPhoneSimulator/include" "$BINDIR"
+fi
+
 
 rm -rf $FRAMEWORK_BUNDLE
 
@@ -318,21 +357,13 @@ ln -s Versions/Current/$FRAMEWORK_NAME $FRAMEWORK_BUNDLE/$FRAMEWORK_NAME
 FRAMEWORK_INSTALL_NAME=$FRAMEWORK_BUNDLE/Versions/$FRAMEWORK_VERSION/$FRAMEWORK_NAME
 
 echo "Lipoing library into $FRAMEWORK_INSTALL_NAME..."
-if [[ "${PLATFORMS}" == *iPhoneOS-V6* ]]
-then
-    lipo \
-        -create \
-        -arch armv6 "$TMPDIR/build/ios/iPhoneOS-V6/lib/${FRAMEWORK_NAME}.a" \
-        -arch armv7 "$TMPDIR/build/ios/iPhoneOS-V7/lib/${FRAMEWORK_NAME}.a" \
-        -arch i386  "$TMPDIR/build/ios/iPhoneSimulator/lib/${FRAMEWORK_NAME}.a" \
-        -output     "$FRAMEWORK_INSTALL_NAME"
-else
-    lipo \
-        -create \
-        -arch armv7 "$TMPDIR/build/ios/iPhoneOS-V7/lib/${FRAMEWORK_NAME}.a" \
-        -arch i386  "$TMPDIR/build/ios/iPhoneSimulator/lib/${FRAMEWORK_NAME}.a" \
-        -output     "$FRAMEWORK_INSTALL_NAME"
-fi
+
+lipo \
+    -create \
+    -arch armv7 "$TMPDIR/build/ios/iPhoneOS-V7/lib/${FRAMEWORK_NAME}.a" \
+    -arch i386  "$TMPDIR/build/ios/iPhoneSimulator/lib/${FRAMEWORK_NAME}.a" \
+    -output     "$FRAMEWORK_INSTALL_NAME"
+
 
 echo "Framework: Copying includes..."
 cp -r "$BINDIR/include/" "$FRAMEWORK_BUNDLE/Headers/"
