@@ -34,11 +34,11 @@ set -e
 #fi
 
 BOOST_SOURCE_NAME=boost_${BOOST_VERSION//./_}
-
+BOOST_DOWNLOAD_FILE_SURFIX=".tar.bz2"
 # Download source
-if [ ! -e "${BOOST_SOURCE_NAME}.tar.gz" ]
+if [ ! -e "${BOOST_SOURCE_NAME}${BOOST_DOWNLOAD_FILE_SURFIX}" ]
 then
-  curl $PROXY -O -L "http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION}/${BOOST_SOURCE_NAME}.tar.bz2"
+  curl $PROXY -O -L "http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION}/${BOOST_SOURCE_NAME}${BOOST_DOWNLOAD_FILE_SURFIX}"
 fi
 
 
@@ -46,7 +46,7 @@ fi
 # Extract source
 if [ ! -d "${BOOST_SOURCE_NAME}" ]
 then
-  tar xvf "${BOOST_SOURCE_NAME}.tar.gz"
+  tar xvf "${BOOST_SOURCE_NAME}${BOOST_DOWNLOAD_FILE_SURFIX}"
 fi
 
 
