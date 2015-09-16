@@ -115,9 +115,9 @@ do
 
 	if [ "${TARGET}" == "x86" ]
 	then
-		export PLATFORM=x86
+		PLATFORM=x86
 	else
-		export PLATFORM=arm-linux-androideabi
+		PLATFORM=arm-linux-androideabi
 	fi
 
 	if [ ! -d "${TMPDIR}/droidtoolchains/${TARGET}" ]
@@ -134,6 +134,13 @@ done
 # Build projects
 for TARGET in ${TARGETS}
 do
+
+	if [ "${TARGET}" == "x86" ]
+	then
+		PLATFORM=x86
+	else
+		PLATFORM=arm-linux-androideabi
+	fi
 	LOGPATH="${LOGDIR}/${TARGET}"
 	ROOTDIR="${TMPDIR}/build/droid/${TARGET}"
 
