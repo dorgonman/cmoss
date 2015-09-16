@@ -50,7 +50,7 @@ then
 fi
 
 
-cp -rf  ${TOPDIR}/patches/boost/* ${BOOST_SOURCE_NAME}/
+cp -rf  ${TOPDIR}/patches/* ${TMPDIR}/
 
 pushd "${BOOST_SOURCE_NAME}"
 
@@ -109,7 +109,7 @@ using gcc : i686 : ${CXX} :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
-<compileflags>-std=gnu++0x
+<compileflags>-std=c++11
 <compileflags>-Wno-variadic-macros
 <compileflags>-Wno-unused-but-set-variable
 <compileflags>-Wno-vla
@@ -148,7 +148,7 @@ using gcc : arm : ${CXX} :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
-<compileflags>-std=gnu++0x
+<compileflags>-std=c++11
 <compileflags>-Wno-variadic-macros	
 <compileflags>-Wno-unused-but-set-variable
 <compileflags>-Wno-vla
@@ -199,7 +199,7 @@ EOF
 
 if [ "${PLATFORM}" == "android-arm" ]
 then
-	./b2 address-model=${ADDRESS_MODEL} link=static threading=multi --layout=versioned target-os=android toolset=gcc-arm install --prefix=${ROOTDIR}
+	./b2 abi=aapcs address-model=${ADDRESS_MODEL} link=static threading=multi --layout=versioned target-os=android toolset=gcc-arm install --prefix=${ROOTDIR}
 else
 	./b2 address-model=${ADDRESS_MODEL} link=static threading=multi --layout=versioned target-os=android toolset=gcc-i686 install --prefix=${ROOTDIR}
 fi

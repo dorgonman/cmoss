@@ -54,7 +54,7 @@ export BOOST_VERSION="1.59.0"
 #context, thread lib not supported
 export BOOST_LIBS="atomic chrono container context coroutine \
 				   coroutine2 date_time exception filesystem graph graph_parallel iostreams \
-				   locale log math mpi program_options python \
+				   locale log mpi program_options \
 				   random regex serialization signals system test thread timer wave"
 
 # Project version to use to build tinyxml
@@ -95,8 +95,8 @@ pushd ${TMPDIR}
 # Platforms to build for (changing this may break the build)
 #iPhoneSimulator
 #PLATFORMS="iPhoneOS_arm iPhoneOS_arm64"
-TARGETS="iPhoneSimulator iPhoneOS_armv7 iPhoneOS_arm64"
-#PLATFORMS="iPhoneSimulator iPhoneOS"
+TARGETS="iPhoneOS_arm64 iPhoneOS_armv7 iPhoneSimulator"
+#PLATFORMS="iPhoneSimulator iPhoneOS iPhoneSimulator"
 # Location of SDK
 DEVELOPER=`xcode-select --print-path`
 export DEVELOPER="${DEVELOPER}"
@@ -145,10 +145,10 @@ do
 	fi
 
 	SDK_NAME=iphoneos${SDK_VER}
-	if [[ "${TARGET}" == *iPhoneOS* ]]
+	if [ "${PLATFORM}" == "iPhoneOS" ]
 	then
 		SDK_NAME=iphoneos${SDK_VER}
-	elif [ "${TARGET}" == *iPhoneSimulator* ]
+	elif [ "${PLATFORM}" == "iPhoneSimulator" ]
 	then
 		SDK_NAME=iphonesimulator${SDK_VER}
 	else
@@ -239,7 +239,7 @@ do
 
 	# Build BOOST
 	echo "start build boost ${BOOST_VERSION}, be patient..."
-	${TOPDIR}/build-ios/build-boost.sh > "${LOGPATH}-boost.log"
+	${TOPDIR}/build-ios/build-boost.sh #> "${LOGPATH}-boost.log"
 
 	# Build tinyxml
 	#${TOPDIR}/build-ios/build-tinyxml.sh > "${LOGPATH}-tinyxml.log"

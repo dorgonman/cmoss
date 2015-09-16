@@ -133,7 +133,7 @@ unpackBoost()
     tar zxf $BOOST_TARBALL
     [ -d $BOOST_SOURCE_NAME ] && echo "    ...unpacked as $BOOST_SOURCE_NAME"
 
-    cp -rf  ${TOPDIR}/patches/boost/* ${BOOST_SOURCE_NAME}/
+    cp -rf  ${TOPDIR}/patches/* ${TMPDIR}/
     cd $BOOST_SOURCE_NAME
 
     doneSection
@@ -193,7 +193,7 @@ buildBoostForiPhoneOS()
     ./b2 --prefix=$ROOTDIR -sBOOST_BUILD_USER_CONFIG=$JAM_FILE \
     --toolset=darwin-${SDK_VER}~iphone cxxflags="-std=c++11 -stdlib=libc++" \
      variant=release linkflags="-stdlib=libc++" architecture=${ARCHITECTURE} target-os=iphone \
-     address-model=${ADDRESS_MODEL} \
+     address-model=${ADDRESS_MODEL} abi=aapcs binary-format=mach-o \
      macosx-version=${BOOST_PLAT}-${SDK_VER} define=_LITTLE_ENDIAN link=static install
 
     doneSection
@@ -205,10 +205,12 @@ scrunchAllLibsTogetherInOneLib()
 {
     OBJDIR=$BOOST_SOURCE_NAME/tmp/obj
     mkdir -p $OBJDIR
-    for a in $ROOTDIR/lib/libboost_*.a; do
+
+    for a in $ROOTDIR/lib/libboost_*.a ; do
         echo thining $a...
-        FAT_FILE=$(lipo -info $a | grep "Non-fat file")
-        if [ "${FAT_FILE}" == "" ]
+        lipo -info $a 
+        FAT_FILE=$(lipo -info $a | grep "fat file")
+        if [ "${FAT_FILE}" != "" ]
         then
             echo "fat file and lipo thin $ARCH $a"
             lipo -thin $ARCH $a -output $a
@@ -230,7 +232,7 @@ scrunchAllLibsTogetherInOneLib()
 cleanEverythingReadyToStart
 unpackBoost
 #cd $BOOST_SOURCE_NAME
-inventMissingHeaders
+#inventMissingHeaders
 bootstrapBoost
 writeBjamUserConfig
 buildBoostForiPhoneOS
