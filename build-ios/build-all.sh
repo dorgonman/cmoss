@@ -50,7 +50,7 @@ export CURL_VERSION="7.28.1"
 export LIBGSASL_VERSION="1.8.0"
 
 # Project version to use to build boost C++ libraries
-export BOOST_VERSION="1.59.0"
+export BOOST_VERSION="1.58.0"
 #context, thread lib not supported
 export BOOST_LIBS="atomic chrono container context coroutine \
 				   coroutine2 date_time exception filesystem graph graph_parallel iostreams \
