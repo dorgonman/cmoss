@@ -113,6 +113,13 @@ for TARGET in ${TARGETS}
 do
 	echo "Checking toolchain for platform ${TARGET}..."
 
+	if [ "${TARGET}" == "x86" ]
+	then
+		PLATFORM=x86
+	else
+		PLATFORM=arm-linux-androideabi
+	fi
+
 	if [ ! -d "${TMPDIR}/droidtoolchains/${TARGET}" ]
 	then
 		echo "Creating toolchain for platform ${TARGET}..."
