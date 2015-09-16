@@ -115,9 +115,9 @@ do
 
 	if [ "${TARGET}" == "x86" ]
 	then
-		PLATFORM=x86
+		export PLATFORM=x86
 	else
-		PLATFORM=arm-linux-androideabi
+		export PLATFORM=arm-linux-androideabi
 	fi
 
 	if [ ! -d "${TMPDIR}/droidtoolchains/${TARGET}" ]
@@ -166,8 +166,7 @@ do
 	
 
 	export ROOTDIR=${ROOTDIR}
-	export PLATFORM=${PLATFORM}
-	export DROIDTOOLS=${TMPDIR}/droidtoolchains/${TARGET}/bin/${TARGET}
+	export DROIDTOOLS=${TMPDIR}/droidtoolchains/${TARGET}/bin/${PLATFORM}
 	export SYSROOT=${TMPDIR}/droidtoolchains/${TARGET}/sysroot
 	export ARCH="${ARCH}"
 	export ARCHITECTURE="${ARCHITECTURE}"
