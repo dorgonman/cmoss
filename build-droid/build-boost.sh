@@ -204,7 +204,7 @@ EOF
 
 ./b2 --prefix=${ROOTDIR} \
 	 --toolset=gcc-${ARCHITECTURE} abi=${ABI} address-model=${ADDRESS_MODEL} \
-	 variant=release \
+	 variant=release binary-format=elf \
 	 link=static threading=multi \
 	--layout=versioned target-os=android install 
 
