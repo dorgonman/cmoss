@@ -157,7 +157,7 @@ do
 	if [ "${TARGET}" == "armv5te" ]
 	then
 		APP_ABI=armeabi
-	if [ "${TARGET}" == "armv7-a" ]
+	elif [ "${TARGET}" == "armv7-a" ]
 	then
 		APP_ABI=armeabi-v7a
 	else
