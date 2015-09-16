@@ -156,14 +156,13 @@ using gcc : arm : ${CXX} :
 <compileflags>-fpic
 <compileflags>-ffunction-sections
 <compileflags>-funwind-tables
-<compileflags>-march=armv7
+<compileflags>-march=${ARCH}
 <compileflags>-mtune=xscale
 <compileflags>-msoft-float
 <compileflags>-mthumb
 <compileflags>-fomit-frame-pointer
 <compileflags>-fno-strict-aliasing
 <compileflags>-finline-limit=64
-<compileflags>-D__ARM_ARCH_7__
 <compileflags>-DANDROID
 <compileflags>-D__ANDROID__
 <compileflags>-DNDEBUG
@@ -179,7 +178,7 @@ using gcc : arm : ${CXX} :
 <linkflags>-L${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/armeabi-v7a
 <linkflags>-L${ROOTDIR}/lib
 # Flags above are for android
-<architecture>armv7
+<architecture>${ARCH}
 <compileflags>-fvisibility=hidden
 <compileflags>-fvisibility-inlines-hidden
 <compileflags>-fdata-sections
@@ -197,12 +196,11 @@ EOF
 
 
 
-if [ "${PLATFORM}" == "android-arm" ]
-then
-	./b2 abi=aapcs address-model=${ADDRESS_MODEL} link=static threading=multi --layout=versioned target-os=android toolset=gcc-arm install --prefix=${ROOTDIR}
-else
-	./b2 address-model=${ADDRESS_MODEL} link=static threading=multi --layout=versioned target-os=android toolset=gcc-i686 install --prefix=${ROOTDIR}
-fi
+
+./b2 abi=${ABI} address-model=${ADDRESS_MODEL} link=static threading=multi \
+	--layout=versioned target-os=android \
+	toolset=gcc-${ARCHITECTURE} install --prefix=${ROOTDIR}
+
 
 # Combine boost libraries into one static archive
 echo ==ROOTDIR======${ROOTDIR} =========$(find "${ROOTDIR}/lib" -name "libboost_*.a" -print)

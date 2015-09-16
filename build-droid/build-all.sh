@@ -138,10 +138,12 @@ do
 		ARCH=${ARM_TARGET}
 		ARCHITECTURE="arm"
 		ADDRESS_MODEL=32
+		ABI=aapcs
 	else
 		PLATFORM="android-i386"
 		ARCH="i386"
 		ARCHITECTURE="x86"
+		ABI=sysv
 	fi
 
 	export ROOTDIR=${ROOTDIR}
@@ -151,8 +153,16 @@ do
 	export ARCH="${ARCH}"
 	export ARCHITECTURE="${ARCHITECTURE}"
 	export ADDRESS_MODEL="${ADDRESS_MODEL}"
+	export ABI="${ABI}"
 
-
+	echo ROOTDIR:               ${ROOTDIR}
+	echo PLATFORM:              ${PLATFORM}
+	echo DROIDTOOLS:            ${DROIDTOOLS}
+	echo SYSROOT:			 	${SYSROOT}
+	echo ARCH:			 		${ARCH}
+	echo ARCHITECTURE:			${ARCHITECTURE}
+	echo ADDRESS_MODEL:			${ADDRESS_MODEL}
+	echo ABI:					${ABI}
 	
 
 	export CC="${DROIDTOOLS}-gcc"
@@ -210,7 +220,7 @@ do
 	#${TOPDIR}/build-droid/build-libgsasl.sh > "${LOGPATH}-libgsasl.log"
 
 	# Build BOOST
-	${TOPDIR}/build-droid/build-boost.sh > "${LOGPATH}-boost.log"
+	${TOPDIR}/build-droid/build-boost.sh #> "${LOGPATH}-boost.log"
 
 	# Build tinyxml
 	#${TOPDIR}/build-droid/build-tinyxml.sh > "${LOGPATH}-tinyxml.log"

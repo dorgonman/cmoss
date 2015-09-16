@@ -283,7 +283,7 @@ done
 
 echo "Build completed for TARGETS: ${TARGETS}"
 
-BINDIR=$(pwd)/bin/
+
 echo BINDIR: ${BINDIR}
 # Create Lipo Archives and Framework bundle
 
