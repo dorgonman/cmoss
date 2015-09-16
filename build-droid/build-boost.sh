@@ -144,7 +144,7 @@ using gcc : i686 : ${CXX} :
 <cxxflags>-D_GLIBCXX__PTHREADS
 ;
 
-using gcc : armv5te : ${CXX} :
+using gcc : armv5 : ${CXX} :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
@@ -195,7 +195,7 @@ using gcc : armv5te : ${CXX} :
 
 
 
-using gcc : armv7-a : ${CXX} :
+using gcc : armv7 : ${CXX} :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
@@ -259,7 +259,7 @@ EOF
 # macosx-version=${BOOST_PLAT}-${SDK_VER} define=_LITTLE_ENDIAN link=static install
 
 ./b2 --prefix=${ROOTDIR} \
-	 --toolset=gcc-${ARCH} abi=${ABI} address-model=${ADDRESS_MODEL} \
+	 --toolset=gcc-${TOOLSET} abi=${ABI} address-model=${ADDRESS_MODEL} \
 	 variant=release binary-format=elf \
 	 link=static threading=multi \
 	--layout=versioned target-os=android install 

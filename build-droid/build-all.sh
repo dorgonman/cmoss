@@ -164,11 +164,14 @@ do
 	if [ "${TARGET}" == "armv5te" ]
 	then
 		APP_ABI=armeabi
+		TOOLSET=armv5
 	elif [ "${TARGET}" == "armv7-a" ]
 	then
 		APP_ABI=armeabi-v7a
+		TOOLSET=armv7
 	else
 		APP_ABI=x86
+		TOOLSET=i686
 	fi
 	
 
@@ -180,6 +183,7 @@ do
 	export ADDRESS_MODEL="${ADDRESS_MODEL}"
 	export ABI="${ABI}"
 	export APP_ABI="${APP_ABI}"
+	export TOOLSET="${TOOLSET}"
 
 	echo ROOTDIR:               ${ROOTDIR}
 	echo PLATFORM:              ${PLATFORM}
@@ -190,7 +194,7 @@ do
 	echo ADDRESS_MODEL:			${ADDRESS_MODEL}
 	echo ABI:					${ABI}
 	echo APP_ABI:				${APP_ABI}
-
+	echo TOOLSET:				${TOOLSET}
 	export CC="${DROIDTOOLS}-gcc"
 	export LD="${DROIDTOOLS}-ld"
 	export CXX="${DROIDTOOLS}-g++"
