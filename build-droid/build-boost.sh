@@ -123,7 +123,7 @@ using gcc : i686 : ${CXX} :
 <compileflags>-DANDROID
 <compileflags>-D__ANDROID__
 <compileflags>-DNDEBUG
-<compileflags>-I${SDK}/platforms/android-14/arch-x86/usr/include
+<compileflags>-I${SDK}/platforms/android-${ANDROID_API_LEVEL}/arch-${ARCHITECTURE}/usr/include
 <compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/include
 <compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/{APP_ABI}}/include
 <compileflags>-I${TMPDIR}/${BOOST_SOURCE_NAME}
@@ -171,7 +171,7 @@ using gcc : armv5 : ${CXX} :
 <compileflags>-D__ARM_ARCH_5E__
 <compileflags>-D__ARM_ARCH_5TE__
 <compileflags>-DNDEBUG
-<compileflags>-I${SDK}/platforms/android-${ANDROID_API_LEVEL}/arch-arm/usr/include
+<compileflags>-I${SDK}/platforms/android-${ANDROID_API_LEVEL}/arch-${ARCHITECTURE}/usr/include
 <compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/include
 <compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/${APP_ABI}/include
 <compileflags>-I${TMPDIR}/${BOOST_SOURCE_NAME}
@@ -220,7 +220,7 @@ using gcc : armv7 : ${CXX} :
 <compileflags>-D__ARM_ARCH_7__
 <compileflags>-D__ARM_ARCH_7A__
 <compileflags>-DNDEBUG
-<compileflags>-I${SDK}/platforms/android-${ANDROID_API_LEVEL}/arch-arm/usr/include
+<compileflags>-I${SDK}/platforms/android-${ANDROID_API_LEVEL}/arch-${ARCHITECTURE}/usr/include
 <compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/include
 <compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/${APP_ABI}/include
 <compileflags>-I${TMPDIR}/${BOOST_SOURCE_NAME}
