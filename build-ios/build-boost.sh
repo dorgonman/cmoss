@@ -119,7 +119,7 @@ doneSection()
 cleanEverythingReadyToStart()
 {
     echo Cleaning everything before we start to build...
-    rm -rf $BOOST_SOURCE_NAME
+    rm -rf "$BOOST_SOURCE_NAME"  || true
     doneSection
 }
 
@@ -128,7 +128,7 @@ unpackBoost()
 {
     echo Unpacking boost into $BOOST_SOURCE_NAME...
 
-    rm -rfv "$BOOST_SOURCE_NAME"
+    rm -rfv "$BOOST_SOURCE_NAME"  || true
 
     tar zxf $BOOST_TARBALL
     [ -d $BOOST_SOURCE_NAME ] && echo "    ...unpacked as $BOOST_SOURCE_NAME"

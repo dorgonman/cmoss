@@ -105,7 +105,7 @@ export DEVELOPER="${DEVELOPER}"
 for TARGET in ${TARGETS}
 do
 	ROOTDIR="${TMPDIR}/build/ios/${TARGET}"
-	rm -rf "${ROOTDIR}"
+	rm -rf "${ROOTDIR}" || true
 	mkdir -p "${ROOTDIR}"
 done
 
@@ -177,7 +177,7 @@ do
 
 	if [ ! -d ${BUILD_SDKROOT} ]
 	then
-		rm -fr ${ROOTDIR}
+		rm -fr ${ROOTDIR} || true
 		echo "WARNING! Unable to locate SDK for architecture ${ARCH}: ${BUILD_SDKROOT}"
 		continue
 	fi
@@ -260,16 +260,16 @@ do
 	#${TOPDIR}/build-ios/build-pion.sh > "${LOGPATH}-pion.log"
 
 	# Remove junk
-	rm -rf "${ROOTDIR}/bin"
-	rm -rf "${ROOTDIR}/certs"
-	rm -rf "${ROOTDIR}/libexec"
-	rm -rf "${ROOTDIR}/man"
-	rm -rf "${ROOTDIR}/misc"
-	rm -rf "${ROOTDIR}/private"
-	rm -rf "${ROOTDIR}/sbin"
-	rm -rf "${ROOTDIR}/share"
-	rm -rf "${ROOTDIR}/openssl.cnf"
-	rm -rf "${ROOTDIR}/obj"
+	rm -rf "${ROOTDIR}/bin" || true
+	rm -rf "${ROOTDIR}/certs"  || true
+	rm -rf "${ROOTDIR}/libexec"  || true
+	rm -rf "${ROOTDIR}/man"  || true
+	rm -rf "${ROOTDIR}/misc"  || true
+	rm -rf "${ROOTDIR}/private"  || true
+	rm -rf "${ROOTDIR}/sbin"  || true
+	rm -rf "${ROOTDIR}/share"  || true
+	rm -rf "${ROOTDIR}/openssl.cnf"  || true
+	rm -rf "${ROOTDIR}/obj"  || true
 
 done
 
@@ -294,10 +294,10 @@ FRAMEWORK_BUNDLE="$BINDIR/$FRAMEWORK_NAME.framework"
 mkdir -p $BINDIR/lib
 mkdir -p $BINDIR/include
 
-rm -f $TMPDIR/build/ios*/lib/${FRAMEWORK_NAME}.a
+rm -f $TMPDIR/build/ios*/lib/${FRAMEWORK_NAME}.a  || true
 for TARGET in ${TARGETS}
 do
-	rm -rf $TMPDIR/build/ios/${TARGET}/obj
+	rm -rf $TMPDIR/build/ios/${TARGET}/obj  || true
 	mkdir -p $TMPDIR/build/ios/${TARGET}/obj
 done
 #if [[ "${PLATFORMS}" == *iPhoneOS-V6* ]]
@@ -318,7 +318,7 @@ for a in $(cat $BINDIR/libs | sort | uniq); do
 		-arch arm64 "$TMPDIR/build/ios/iPhoneOS_arm64/lib/$a" \
 		-arch i386 "$TMPDIR/build/ios/iPhoneSimulator/lib/$a"
 done
-rm -f $BINDIR/libs
+rm -f $BINDIR/libs  || true
 
 echo "Linking each architecture into an archive ${FRAMEWORK_NAME}.a for each platform to be built into the framework"
 
@@ -341,7 +341,7 @@ then
 fi
 
 
-rm -rf $FRAMEWORK_BUNDLE
+rm -rf $FRAMEWORK_BUNDLE  || true
 
 echo "Framework: Setting up directories..."
 mkdir -p $FRAMEWORK_BUNDLE

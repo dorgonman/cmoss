@@ -88,7 +88,7 @@ export LOGDIR=$TOPDIR/log/droid
 export TMPDIR=$TOPDIR/tmp
 popd
 
-rm -rf $LOGDIR
+rm -rf $LOGDIR || true
 mkdir -p $LOGDIR
 mkdir -p $TMPDIR
 
@@ -231,15 +231,15 @@ do
 	#${TOPDIR}/build-droid/build-pion.sh > "${LOGPATH}-pion.log"
 
 	# Remove junk
-	rm -rf "${ROOTDIR}/bin"
-	rm -rf "${ROOTDIR}/certs"
-	rm -rf "${ROOTDIR}/libexec"
-	rm -rf "${ROOTDIR}/man"
-	rm -rf "${ROOTDIR}/misc"
-	rm -rf "${ROOTDIR}/private"
-	rm -rf "${ROOTDIR}/sbin"
-	rm -rf "${ROOTDIR}/share"
-	rm -rf "${ROOTDIR}/openssl.cnf"
+	rm -rf "${ROOTDIR}/bin" || true
+	rm -rf "${ROOTDIR}/certs" || true
+	rm -rf "${ROOTDIR}/libexec" || true
+	rm -rf "${ROOTDIR}/man" || true
+	rm -rf "${ROOTDIR}/misc" || true
+	rm -rf "${ROOTDIR}/private" || true
+	rm -rf "${ROOTDIR}/sbin" || true
+	rm -rf "${ROOTDIR}/share" || true
+	rm -rf "${ROOTDIR}/openssl.cnf" || true
 
 done
 
