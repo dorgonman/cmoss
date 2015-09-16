@@ -95,11 +95,11 @@ mkdir -p $TMPDIR
 pushd $TMPDIR
 
 export ANDROID_API_LEVEL="21"
-export ARM_TARGET="armv7"
+export ARM_TARGET="armv5te"
 
 if [ -z $TOOLCHAIN_VERSION ]
 then
-	export TOOLCHAIN_VERSION="4.6"
+	export TOOLCHAIN_VERSION="4.9"
 fi
 
 # Platforms to build for (changing this may break the build)
