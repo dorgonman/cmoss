@@ -193,9 +193,8 @@ buildBoostForiPhoneOS()
     ./b2 --prefix=$ROOTDIR -sBOOST_BUILD_USER_CONFIG=$JAM_FILE \
     --toolset=darwin-${SDK_VER}~iphone cxxflags="-std=c++11 -stdlib=libc++" \
      variant=release linkflags="-stdlib=libc++" architecture=${ARCHITECTURE} target-os=iphone \
-     address-model=${ADDRESS_MODEL} abi=aapcs binary-format=mach-o \
+     address-model=${ADDRESS_MODEL} abi=${ABI} binary-format=mach-o \
      macosx-version=${BOOST_PLAT}-${SDK_VER} define=_LITTLE_ENDIAN link=static install
-
     doneSection
 }
 

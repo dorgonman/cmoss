@@ -95,7 +95,7 @@ pushd ${TMPDIR}
 # Platforms to build for (changing this may break the build)
 #iPhoneSimulator
 #PLATFORMS="iPhoneOS_arm iPhoneOS_arm64"
-TARGETS="iPhoneOS_arm64 iPhoneOS_armv7 iPhoneSimulator"
+TARGETS="iPhoneSimulator iPhoneOS_arm64 iPhoneOS_armv7"
 #PLATFORMS="iPhoneSimulator iPhoneOS iPhoneSimulator"
 # Location of SDK
 DEVELOPER=`xcode-select --print-path`
@@ -126,22 +126,27 @@ do
 		ARCH="armv7"
 		ARCHITECTURE="arm"
 		ADDRESS_MODEL=32
+		ABI=aapcs
 	elif [ "${TARGET}" == "iPhoneOS_arm64" ]
 	then
 		PLATFORM="iPhoneOS"
 		ARCH="arm64"
 		ARCHITECTURE="arm"
 		ADDRESS_MODEL=64
+		ABI=aapcs
 	elif [ "${TARGET}" == "iPhoneSimulator" ]
 	then
 		PLATFORM="iPhoneSimulator"
 		ARCH="i386"
 		ARCHITECTURE="x86"
-		ADDRESS_MODEL=32
+		ADDRESS_MODEL=32_64
+		ABI=sysv
 	else
 		PLATFORM="MacOSX"
 		ARCH="i386"
 		ARCHITECTURE="x86"
+		ADDRESS_MODEL=32_64
+		ABI=sysv
 	fi
 
 	SDK_NAME=iphoneos${SDK_VER}
@@ -161,17 +166,19 @@ do
 	export ARCH="${ARCH}"
 	export ARCHITECTURE="${ARCHITECTURE}"
 	export ADDRESS_MODEL="${ADDRESS_MODEL}"
+	export ABI="${ABI}"
 
 	export BUILD_DEVROOT="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
 	export BUILD_SDKROOT="${BUILD_DEVROOT}/SDKs/${PLATFORM}${SDK_VER}.sdk"
 
 
-	echo exported SDK_NAME: 		${SDK_NAME}
+	echo exported SDK_NAME: 	${SDK_NAME}
 	echo exported ROOTDIR: 		${ROOTDIR}
 	echo exported PLATFORM: 	${PLATFORM}
 	echo exported ARCH: 		${ARCH}
 	echo exported ARCHITECTURE: ${ARCHITECTURE}
-	echo exported ADDRESS_MODEL: ${ADDRESS_MODEL}
+	echo exported ADDRESS_MODEL:${ADDRESS_MODEL}
+	echo exported ABI: 			${ABI}
 	echo exported BUILD_DEVROOT:${BUILD_DEVROOT}
 	echo exported BUILD_SDKROOT:${BUILD_SDKROOT}
 
@@ -322,16 +329,35 @@ rm -f $BINDIR/libs  || true
 
 echo "Linking each architecture into an archive ${FRAMEWORK_NAME}.a for each platform to be built into the framework"
 
-for PLATFORM in ${PLATFORMS}
+for TARGET in ${TARGETS}
 do
-	if [ "${PLATFORM}" == "iPhoneSimulator" ]
+	PLATFORM="iPhoneOS"
+	if [ "${TARGET}" == "iPhoneOS_armv7" ]
 	then
-		AR="${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/usr/bin/ar"
+		PLATFORM="iPhoneOS"
+	elif [ "${TARGET}" == "iPhoneOS_arm64" ]
+	then
+		PLATFORM="iPhoneOS"
+	elif [ "${TARGET}" == "iPhoneSimulator" ]
+	then
+		PLATFORM="iPhoneSimulator"
 	else
-		AR="${DEVELOPER}/Platforms/iPhoneOS.platform/Developer/usr/bin/ar"
+		PLATFORM="MacOSX"
 	fi
+
+	SDK_NAME=iphoneos${SDK_VER}
+	if [ "${PLATFORM}" == "iPhoneOS" ]
+	then
+		SDK_NAME=iphoneos${SDK_VER}
+	elif [ "${PLATFORM}" == "iPhoneSimulator" ]
+	then
+		SDK_NAME=iphonesimulator${SDK_VER}
+	else
+		SDK_NAME=macosx${SDK_VER}
+	fi
+	AR="$(xcrun --sdk ${SDK_NAME} -find ar)"
 	echo ...$PLATFORM
-	(cd $TMPDIR/build/ios/${PLATFORM}/obj; $AR crus $TMPDIR/build/ios/${PLATFORM}/lib/${FRAMEWORK_NAME}.a *.o; )
+	(cd $TMPDIR/build/ios/${TARGET}/obj; $AR crus $TMPDIR/build/ios/${TARGET}/lib/${FRAMEWORK_NAME}.a *.o; )
 done
 
 
@@ -361,10 +387,11 @@ ln -s Versions/Current/$FRAMEWORK_NAME $FRAMEWORK_BUNDLE/$FRAMEWORK_NAME
 FRAMEWORK_INSTALL_NAME=$FRAMEWORK_BUNDLE/Versions/$FRAMEWORK_VERSION/$FRAMEWORK_NAME
 
 echo "Lipoing library into $FRAMEWORK_INSTALL_NAME..."
-
+#TARGETS="iPhoneSimulator iPhoneOS_arm64 iPhoneOS_armv7"
 lipo \
     -create \
-    -arch armv7 "$TMPDIR/build/ios/iPhoneOS-V7/lib/${FRAMEWORK_NAME}.a" \
+    -arch armv7 "$TMPDIR/build/ios/iPhoneOS_armv7/lib/${FRAMEWORK_NAME}.a" \
+    -arch arm64 "$TMPDIR/build/ios/iPhoneOS_arm64/lib/${FRAMEWORK_NAME}.a" \
     -arch i386  "$TMPDIR/build/ios/iPhoneSimulator/lib/${FRAMEWORK_NAME}.a" \
     -output     "$FRAMEWORK_INSTALL_NAME"
 
