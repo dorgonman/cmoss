@@ -267,10 +267,10 @@ alias asm_context_sources
    ;
 #==========patch arm elf begin=================
 alias asm_context_sources
-   : [ make asm/make_arm_aapcs_macho_gas.o : asm/make_arm_aapcs_macho_gas.S : @gasarmv7 ]
-     [ make asm/jump_arm_aapcs_macho_gas.o : asm/jump_arm_aapcs_macho_gas.S : @gasarmv7 ]
-     [ make asm/make_arm64_aapcs_macho_gas.o : asm/make_arm64_aapcs_macho_gas.S : @gasarm64 ]
-     [ make asm/jump_arm64_aapcs_macho_gas.o : asm/jump_arm64_aapcs_macho_gas.S : @gasarm64 ]
+   : [ make asm/make_arm_aapcs_elf_gas.o : asm/make_arm_aapcs_elf_gas.S : @gasarmv7 ]
+     [ make asm/jump_arm_aapcs_elf_gas.o : asm/jump_arm_aapcs_elf_gas.S : @gasarmv7 ]
+     [ make asm/make_arm64_aapcs_elf_gas.o : asm/make_arm64_aapcs_elf_gas.S : @gasarm64 ]
+     [ make asm/jump_arm64_aapcs_elf_gas.o : asm/jump_arm64_aapcs_elf_gas.S : @gasarm64 ]
    : <abi>aapcs
      <address-model>32_64
      <architecture>arm
@@ -278,8 +278,8 @@ alias asm_context_sources
      <toolset>darwin
    ;
 alias asm_context_sources
-   : [ make asm/make_arm_aapcs_macho_gas.o : asm/make_arm_aapcs_macho_gas.S : @gasarmv7 ]
-     [ make asm/jump_arm_aapcs_macho_gas.o : asm/jump_arm_aapcs_macho_gas.S : @gasarmv7 ]
+   : [ make asm/make_arm_aapcs_elf_gas.o : asm/make_arm_aapcs_elf_gas.S : @gasarmv7 ]
+     [ make asm/jump_arm_aapcs_elf_gas.o : asm/jump_arm_aapcs_elf_gas.S : @gasarmv7 ]
    : <abi>aapcs
      <address-model>32
      <architecture>arm
@@ -288,14 +288,23 @@ alias asm_context_sources
    ;
 
 alias asm_context_sources
-   : [ make asm/make_arm64_aapcs_macho_gas.o : asm/make_arm64_aapcs_macho_gas.S : @gasarm64 ]
-     [ make asm/jump_arm64_aapcs_macho_gas.o : asm/jump_arm64_aapcs_macho_gas.S : @gasarm64 ]
+   : [ make asm/make_arm64_aapcs_elf_gas.o : asm/make_arm64_aapcs_elf_gas.S : @gasarm64 ]
+     [ make asm/jump_arm64_aapcs_elf_gas.o : asm/jump_arm64_aapcs_elf_gas.S : @gasarm64 ]
    : <abi>aapcs
      <address-model>64
      <architecture>arm
      <binary-format>elf
      <toolset>darwin
    ;
+ alias asm_context_sources
+ : [ make asm/make_arm_aapcs_elf_gas.o : asm/make_arm_aapcs_elf_gas.S : @gasarmv5 ]
+   [ make asm/jump_arm_aapcs_elf_gas.o : asm/jump_arm_aapcs_elf_gas.S : @gasarmv5 ]
+ : <abi>aapcs
+   <address-model>32
+   <architecture>arm
+   <binary-format>elf
+   <toolset>darwin
+ ;
 #==========patch arm elf end=================
 # ARM64/AAPCS/MACH-O
 alias asm_context_sources

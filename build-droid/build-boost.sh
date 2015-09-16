@@ -196,10 +196,17 @@ EOF
 
 
 
+#./b2 --prefix=$ROOTDIR -sBOOST_BUILD_USER_CONFIG=$JAM_FILE \
+#--toolset=darwin-${SDK_VER}~iphone cxxflags="-std=c++11 -stdlib=libc++" \
+# variant=release linkflags="-stdlib=libc++" architecture=${ARCHITECTURE} target-os=iphone \
+# address-model=${ADDRESS_MODEL} abi=${ABI} binary-format=mach-o \
+# macosx-version=${BOOST_PLAT}-${SDK_VER} define=_LITTLE_ENDIAN link=static install
 
-./b2 abi=${ABI} address-model=${ADDRESS_MODEL} link=static threading=multi \
-	--layout=versioned target-os=android \
-	toolset=gcc-${ARCHITECTURE} install --prefix=${ROOTDIR}
+./b2 --prefix=${ROOTDIR} \
+	 --toolset=gcc-${ARCHITECTURE} abi=${ABI} address-model=${ADDRESS_MODEL} \
+	 variant=release \
+	 link=static threading=multi \
+	--layout=versioned target-os=android install 
 
 
 # Combine boost libraries into one static archive
