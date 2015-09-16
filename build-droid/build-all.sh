@@ -95,7 +95,7 @@ mkdir -p $TMPDIR
 pushd $TMPDIR
 
 export ANDROID_API_LEVEL="21"
-export ARM_TARGET="armv5te"
+#export ARM_TARGET="armv5te"
 
 if [ -z $TOOLCHAIN_VERSION ]
 then
@@ -105,8 +105,9 @@ fi
 # Platforms to build for (changing this may break the build)
 #PLATFORMS="arm-linux-androideabi x86"
 #PLATFORMS="arm-linux-androideabi"
-TARGETS="arm-linux-androideabi"
-
+#TARGETS="arm-linux-androideabi"
+TARGETS="armv5te armv7-a"
+TARGETS="armv5te armv7-a x86"
 # Create tool chains for each supported platform
 for TARGET in ${TARGETS}
 do
@@ -132,19 +133,30 @@ do
 	mkdir -p "${ROOTDIR}"
 
 
-	if [ "${TARGET}" == "arm-linux-androideabi" ]
+	if [ "${TARGET}" == "x86" ]
 	then
-		PLATFORM="android-arm"
-		ARCH=${ARM_TARGET}
+		ARCH="i386"
+		ARCHITECTURE="x86"
+		ADDRESS_MODEL=32
+		ABI=sysv
+		
+	else
+		ARCH=${TARGET}
 		ARCHITECTURE="arm"
 		ADDRESS_MODEL=32
 		ABI=aapcs
-	else
-		PLATFORM="android-i386"
-		ARCH="i386"
-		ARCHITECTURE="x86"
-		ABI=sysv
 	fi
+
+	if [ "${TARGET}" == "armv5te" ]
+	then
+		APP_ABI=armeabi
+	if [ "${TARGET}" == "armv7-a" ]
+	then
+		APP_ABI=armeabi-v7a
+	else
+		APP_ABI=x86
+	fi
+	
 
 	export ROOTDIR=${ROOTDIR}
 	export PLATFORM=${PLATFORM}
@@ -154,6 +166,7 @@ do
 	export ARCHITECTURE="${ARCHITECTURE}"
 	export ADDRESS_MODEL="${ADDRESS_MODEL}"
 	export ABI="${ABI}"
+	export APP_ABI="${APP_ABI}"
 
 	echo ROOTDIR:               ${ROOTDIR}
 	echo PLATFORM:              ${PLATFORM}
@@ -163,7 +176,7 @@ do
 	echo ARCHITECTURE:			${ARCHITECTURE}
 	echo ADDRESS_MODEL:			${ADDRESS_MODEL}
 	echo ABI:					${ABI}
-	
+	echo APP_ABI:				${APP_ABI}
 
 	export CC="${DROIDTOOLS}-gcc"
 	export LD="${DROIDTOOLS}-ld"
@@ -253,23 +266,30 @@ do
 
 done
 
-mkdir -p ${BINDIR}/include
-cp -r ${TMPDIR}/build/droid/arm-linux-androideabi/include ${BINDIR}/
 
-#mkdir -p ${BINDIR}/lib/x86
-mkdir -p ${BINDIR}/lib/${ARM_TARGET}
 
-#cp ${TMPDIR}/build/droid/i686-android-linux/lib/*.a ${BINDIR}/lib/x86
-#cp ${TMPDIR}/build/droid/i686-android-linux/lib/*.la ${BINDIR}/lib/x86
+for TARGET in ${TARGETS}
+do
+	mkdir -p ${BINDIR}/include
+	cp -r ${TMPDIR}/build/droid/${TARGET}/include ${BINDIR}/
 
-#(cd ${TMPDIR}/build/droid/i686-android-linux/lib && tar cf - *.so ) | ( cd ${BINDIR}/lib/x86 && tar xfB - )
-#(cd ${TMPDIR}/build/droid/i686-android-linux/lib && tar cf - *.so.* ) | ( cd ${BINDIR}/lib/x86 && tar xfB - )
+	#mkdir -p ${BINDIR}/lib/x86
+	mkdir -p ${BINDIR}/lib/${TARGET}
 
-cp ${TMPDIR}/build/droid/arm-linux-androideabi/lib/*.a ${BINDIR}/lib/${ARM_TARGET}
-cp ${TMPDIR}/build/droid/arm-linux-androideabi/lib/*.la ${BINDIR}/lib/${ARM_TARGET}
+	#cp ${TMPDIR}/build/droid/i686-android-linux/lib/*.a ${BINDIR}/lib/x86
+	#cp ${TMPDIR}/build/droid/i686-android-linux/lib/*.la ${BINDIR}/lib/x86
 
-(cd ${TMPDIR}/build/droid/arm-linux-androideabi/lib && tar cf - *.so ) | ( cd ${BINDIR}/lib/${ARM_TARGET} && tar xfB - )
-#(cd ${TMPDIR}/build/droid/arm-linux-androideabi/lib && tar cf - *.so.* ) | ( cd ${BINDIR}/lib/${ARM_TARGET} && tar xfB - )
+	#(cd ${TMPDIR}/build/droid/i686-android-linux/lib && tar cf - *.so ) | ( cd ${BINDIR}/lib/x86 && tar xfB - )
+	#(cd ${TMPDIR}/build/droid/i686-android-linux/lib && tar cf - *.so.* ) | ( cd ${BINDIR}/lib/x86 && tar xfB - )
+
+	cp ${TMPDIR}/build/droid/${TARGET}/lib/*.a ${BINDIR}/lib/${TARGET}
+	cp ${TMPDIR}/build/droid/${TARGET}/lib/*.la ${BINDIR}/lib/${TARGET}
+
+	(cd ${TMPDIR}/build/droid/${TARGET}/lib && tar cf - *.so ) | ( cd ${BINDIR}/lib/${TARGET} && tar xfB - )
+	#(cd ${TMPDIR}/build/droid/arm-linux-androideabi/lib && tar cf - *.so.* ) | ( cd ${BINDIR}/lib/${ARM_TARGET} && tar xfB - )
+
+done
+
 
 echo "**** Android c/c++ open source build completed ****"
 

@@ -125,14 +125,14 @@ using gcc : i686 : ${CXX} :
 <compileflags>-DNDEBUG
 <compileflags>-I${SDK}/platforms/android-14/arch-x86/usr/include
 <compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/include
-<compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/x86/include
+<compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/{APP_ABI}}/include
 <compileflags>-I${TMPDIR}/${BOOST_SOURCE_NAME}
 <compileflags>-I${ROOTDIR}/include
 <linkflags>-nostdlib
 <linkflags>-lc
 <linkflags>-Wl,-rpath-link=${SYSROOT}/usr/lib
 <linkflags>-L${SYSROOT}/usr/lib
-<linkflags>-L${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/x86
+<linkflags>-L${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/${APP_ABI}
 <linkflags>-L${ROOTDIR}/lib
 # Flags above are for android
 <architecture>x86
@@ -144,7 +144,7 @@ using gcc : i686 : ${CXX} :
 <cxxflags>-D_GLIBCXX__PTHREADS
 ;
 
-using gcc : arm : ${CXX} :
+using gcc : armv5te : ${CXX} :
 <compileflags>-Os
 <compileflags>-O2
 <compileflags>-g
@@ -163,19 +163,24 @@ using gcc : arm : ${CXX} :
 <compileflags>-fomit-frame-pointer
 <compileflags>-fno-strict-aliasing
 <compileflags>-finline-limit=64
-<compileflags>-DANDROID
 <compileflags>-D__ANDROID__
+<compileflags>-DANDROID=1
+<compileflags>-D__ARM_ARCH__
+<compileflags>-D__ARM_ARCH_5__
+<compileflags>-D__ARM_ARCH_5T__
+<compileflags>-D__ARM_ARCH_5E__
+<compileflags>-D__ARM_ARCH_5TE__
 <compileflags>-DNDEBUG
-<compileflags>-I${SDK}/platforms/android-14/arch-arm/usr/include
+<compileflags>-I${SDK}/platforms/android-${ANDROID_API_LEVEL}/arch-arm/usr/include
 <compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/include
-<compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/armeabi-v7a/include
+<compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/${APP_ABI}/include
 <compileflags>-I${TMPDIR}/${BOOST_SOURCE_NAME}
 <compileflags>-I${ROOTDIR}/include
 <linkflags>-nostdlib
 <linkflags>-lc
 <linkflags>-Wl,-rpath-link=${SYSROOT}/usr/lib
 <linkflags>-L${SYSROOT}/usr/lib
-<linkflags>-L${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/armeabi-v7a
+<linkflags>-L${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/${APP_ABI}
 <linkflags>-L${ROOTDIR}/lib
 # Flags above are for android
 <architecture>${ARCH}
@@ -187,6 +192,57 @@ using gcc : arm : ${CXX} :
 <cxxflags>-D_REENTRANT
 <cxxflags>-D_GLIBCXX__PTHREADS
 ;
+
+
+
+using gcc : armv7-a : ${CXX} :
+<compileflags>-Os
+<compileflags>-O2
+<compileflags>-g
+<compileflags>-std=c++11
+<compileflags>-Wno-variadic-macros	
+<compileflags>-Wno-unused-but-set-variable
+<compileflags>-Wno-vla
+<compileflags>-fexceptions
+<compileflags>-fpic
+<compileflags>-ffunction-sections
+<compileflags>-funwind-tables
+<compileflags>-march=${ARCH}
+<compileflags>-mtune=xscale
+<compileflags>-msoft-float
+<compileflags>-mthumb
+<compileflags>-fomit-frame-pointer
+<compileflags>-fno-strict-aliasing
+<compileflags>-finline-limit=64
+<compileflags>-D__ANDROID__
+<compileflags>-DANDROID=1
+<compileflags>-D__ARM_ARCH__
+<compileflags>-D__ARM_ARCH_7__
+<compileflags>-D__ARM_ARCH_7A__
+<compileflags>-DNDEBUG
+<compileflags>-I${SDK}/platforms/android-${ANDROID_API_LEVEL}/arch-arm/usr/include
+<compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/include
+<compileflags>-I${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/${APP_ABI}/include
+<compileflags>-I${TMPDIR}/${BOOST_SOURCE_NAME}
+<compileflags>-I${ROOTDIR}/include
+<linkflags>-nostdlib
+<linkflags>-lc
+<linkflags>-Wl,-rpath-link=${SYSROOT}/usr/lib
+<linkflags>-L${SYSROOT}/usr/lib
+<linkflags>-L${SDK}/sources/cxx-stl/gnu-libstdc++/${TOOLCHAIN_VERSION}/libs/${APP_ABI}
+<linkflags>-L${ROOTDIR}/lib
+# Flags above are for android
+<architecture>${ARCH}
+<compileflags>-fvisibility=hidden
+<compileflags>-fvisibility-inlines-hidden
+<compileflags>-fdata-sections
+<cxxflags>-frtti
+<cxxflags>-D__arm__
+<cxxflags>-D_REENTRANT
+<cxxflags>-D_GLIBCXX__PTHREADS
+;
+
+
 
 option.set prefix : ${ROOTDIR}/ ;
 option.set exec-prefix : ${ROOTDIR}/bin ;
@@ -203,7 +259,7 @@ EOF
 # macosx-version=${BOOST_PLAT}-${SDK_VER} define=_LITTLE_ENDIAN link=static install
 
 ./b2 --prefix=${ROOTDIR} \
-	 --toolset=gcc-${ARCHITECTURE} abi=${ABI} address-model=${ADDRESS_MODEL} \
+	 --toolset=gcc-${ARCH} abi=${ABI} address-model=${ADDRESS_MODEL} \
 	 variant=release binary-format=elf \
 	 link=static threading=multi \
 	--layout=versioned target-os=android install 
