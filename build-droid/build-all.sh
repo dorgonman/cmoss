@@ -115,7 +115,7 @@ do
 
 	if [ "${TARGET}" == "x86" ]
 	then
-		PLATFORM=x86
+		PLATFORM=i686-linux-android
 	else
 		PLATFORM=arm-linux-androideabi
 	fi
@@ -137,7 +137,7 @@ do
 
 	if [ "${TARGET}" == "x86" ]
 	then
-		PLATFORM=x86
+		PLATFORM=i686-linux-android
 	else
 		PLATFORM=arm-linux-androideabi
 	fi
@@ -149,7 +149,7 @@ do
 
 	if [ "${TARGET}" == "x86" ]
 	then
-		ARCH="i386"
+		ARCH="i686"
 		ARCHITECTURE="x86"
 		ADDRESS_MODEL=32
 		ABI=sysv
@@ -300,7 +300,7 @@ do
 	#(cd ${TMPDIR}/build/droid/i686-android-linux/lib && tar cf - *.so.* ) | ( cd ${BINDIR}/lib/x86 && tar xfB - )
 
 	cp ${TMPDIR}/build/droid/${TARGET}/lib/*.a ${BINDIR}/lib/${TARGET}
-	cp ${TMPDIR}/build/droid/${TARGET}/lib/*.la ${BINDIR}/lib/${TARGET}
+	cp ${TMPDIR}/build/droid/${TARGET}/lib/*.la ${BINDIR}/lib/${TARGET} || true
 
 	(cd ${TMPDIR}/build/droid/${TARGET}/lib && tar cf - *.so ) | ( cd ${BINDIR}/lib/${TARGET} && tar xfB - )
 	#(cd ${TMPDIR}/build/droid/arm-linux-androideabi/lib && tar cf - *.so.* ) | ( cd ${BINDIR}/lib/${ARM_TARGET} && tar xfB - )
