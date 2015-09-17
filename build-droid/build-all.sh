@@ -106,8 +106,8 @@ fi
 #PLATFORMS="arm-linux-androideabi x86"
 #PLATFORMS="arm-linux-androideabi"
 #TARGETS="arm-linux-androideabi"
-TARGETS="armv5te armv7-a"
-TARGETS="armv5te armv7-a x86"
+
+TARGETS="armeabi armeabi-v7a x86"
 # Create tool chains for each supported platform
 for TARGET in ${TARGETS}
 do
@@ -147,31 +147,32 @@ do
 	mkdir -p "${ROOTDIR}"
 
 
-	if [ "${TARGET}" == "x86" ]
+	if [ "${TARGET}" == "armeabi" ]
+	then
+		ARCH="armv5te"
+		ARCHITECTURE="arm"
+		ADDRESS_MODEL=32
+		ABI=aapcs
+		APP_ABI=armeabi
+		TOOLSET=armv5
+	elif [ "${TARGET}" == "armeabi-v7a" ]
+	then
+		ARCH="armv7-a"
+		ARCHITECTURE="arm"
+		ADDRESS_MODEL=32
+		ABI=aapcs
+		APP_ABI=armeabi-v7a
+		TOOLSET=armv7
+	elif [ "${TARGET}" == "x86" ]
 	then
 		ARCH="i686"
 		ARCHITECTURE="x86"
 		ADDRESS_MODEL=32
 		ABI=sysv
-		
-	else
-		ARCH=${TARGET}
-		ARCHITECTURE="arm"
-		ADDRESS_MODEL=32
-		ABI=aapcs
-	fi
-
-	if [ "${TARGET}" == "armv5te" ]
-	then
-		APP_ABI=armeabi
-		TOOLSET=armv5
-	elif [ "${TARGET}" == "armv7-a" ]
-	then
-		APP_ABI=armeabi-v7a
-		TOOLSET=armv7
-	else
 		APP_ABI=x86
 		TOOLSET=i686
+	else
+		echo "${TARGET} not supported"
 	fi
 	
 
