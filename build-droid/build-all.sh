@@ -43,7 +43,7 @@ export LIBGCRYPT_VERSION="1.5.0"
 export GNUPG_VERSION="1.4.13"
 
 # Project versions to use to build openssl (changing this may break the build)
-export OPENSSL_VERSION="1.0.2e"
+export OPENSSL_VERSION="1.0.2h"
 
 # Project versions to use to build libssh2 and cURL (changing this may break the build)
 export LIBSSH2_VERSION="1.3.0"
@@ -257,7 +257,7 @@ do
 	#${TOPDIR}/build-droid/build-libgsasl.sh > "${LOGPATH}-libgsasl.log"
 
 	# Build BOOST
-	${TOPDIR}/build-droid/build-boost.sh > "${LOGPATH}-boost.log"
+	#${TOPDIR}/build-droid/build-boost.sh > "${LOGPATH}-boost.log"
 
 	# Build tinyxml
 	#${TOPDIR}/build-droid/build-tinyxml.sh > "${LOGPATH}-tinyxml.log"

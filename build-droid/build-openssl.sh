@@ -29,7 +29,7 @@ set -e
 # Download source
 if [ ! -e "openssl-${OPENSSL_VERSION}.tar.gz" ]
 then
-  curl $PROXY -O "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
+  curl $PROXY -O -L "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
 fi
 
 # Extract source
